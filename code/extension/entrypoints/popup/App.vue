@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed } from "vue";
 import { Product, ProductState, ProfileData } from "@/types/product";
+import Button from "@/components/ui/button/Button.vue";
 
 const profiles = ref<ProfileData[]>([]);
 const selectedProfile = ref<string | null>(null);
@@ -326,6 +327,7 @@ async function exportSingleProduct(product: Product, event: Event) {
 </script>
 
 <template>
+  <Button variant="outline"> Button </Button>
   <div
     class="min-w-[700px] max-w-[900px] min-h-[500px] max-h-[500px] bg-gray-50 flex flex-col overflow-hidden"
   >
