@@ -6,19 +6,18 @@ export enum ProductState {
 
 // Listing: Basic info scraped from profile pages
 export interface ProductListing {
-  id: string; // Extracted from URL
   title: string;
   price: number;
   url: string;
   datePosted: string;
   date: string; // ISO date string
   state: ProductState;
-  thumbnail?: string; // Thumbnail image from listing card
+  thumbnail: string; // Thumbnail image from listing card
+  scrapedAt: string; // ISO date string - when this listing was scraped
 }
 
 // Detail: Additional info fetched from individual ad pages
 export interface ProductDetail {
-  id: string;
   description: string;
   photos: string[];
   scrapedAt: string; // ISO date string - when details were fetched
@@ -33,22 +32,23 @@ export interface OdooExportStatus {
 }
 
 // Combined view for convenience
-export interface Product extends ProductListing {
-  description?: string;
-  photos?: string[];
-  detailsScrapedAt?: string;
+export interface CombinedProduct {
+  identifier: string;
+  listing: ProductListing;
+  detail?: ProductDetail;
   odooExport?: OdooExportStatus;
 }
 
-export interface ProfileData {
-  username: string;
-  profileName?: string; // Display name from profile page
-  listings: Record<string, ProductListing>; // keyed by product ID
-  details: Record<string, ProductDetail>; // keyed by product ID
-  odooExports?: Record<string, OdooExportStatus>; // keyed by product ID
-  lastScraped: string; // ISO date string
+export interface ProductUpdateStatistics {
+  added: number;
+  updated: number;
+  removed: number;
 }
 
-export interface StorageData {
-  profiles: Record<string, ProfileData>; // keyed by username
+export interface ProfileData {
+  displayName?: string; // Display name from profile page
+  listings: Record<string, ProductListing>; // keyed by product ID
+  details: Record<string, ProductDetail>; // keyed by product ID
+  odooExports: Record<string, OdooExportStatus>; // keyed by product ID
+  lastScraped: string; // ISO date string
 }

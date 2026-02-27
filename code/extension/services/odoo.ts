@@ -1,4 +1,4 @@
-import { Product, ProductState } from "@/types/product";
+import { Product, ProductState } from "@/utilities/product";
 
 // Constants and mappings from Python script
 const TAGS_MAP: Record<string, string[]> = {
@@ -587,7 +587,7 @@ class OdooService {
         if (result.updated) updated++;
         if (result.archived) archived++;
       } else if (result.error) {
-        errors.push({ productId: product.id, error: result.error });
+        errors.push({ productId: product.identifier, error: result.error });
       }
     }
 

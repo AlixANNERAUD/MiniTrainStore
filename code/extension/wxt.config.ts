@@ -36,6 +36,12 @@ export default defineConfig({
   webExt: {
     chromiumProfile: chromeDataPath,
     firefoxProfile: firefoxDataPath,
+    chromiumArgs: [
+      // Bypass bot detection systems (e.g., DataDome on leboncoin.fr)
+      // This prevents navigator.webdriver from being set to true
+      "--disable-blink-features=AutomationControlled",
+      "--user-data-dir=./.wxt/chrome-data",
+    ],
     keepProfileChanges: true,
   },
 });
