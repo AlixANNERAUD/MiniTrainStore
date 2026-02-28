@@ -1,4 +1,18 @@
-import { ProductListing } from "../product";
+import { ProductListing } from "../settings";
+
+export function extractUsernameFromProductPage(): string | null {
+  // Try to find the seller profile link
+  const PROFILE_LINK_SELECTOR = 'a[href^="/profile/"]';
+
+  const profileLink = document.querySelector(
+    PROFILE_LINK_SELECTOR,
+  ) as HTMLAnchorElement;
+
+  if (!profileLink) return null;
+
+  const match = profileLink.getAttribute("href")?.match(/^\/profile\/([^\/]+)/);
+  return match ? match[1] : null;
+}
 
 async function getPhotoUrls(): Promise<string[]> {
   const photos: string[] = [];

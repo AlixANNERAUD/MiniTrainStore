@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed } from "vue";
-import { ProductState, ProfileData } from "@/utilities/product";
+import { ProductState, ProfileData } from "@/utilities/settings";
 import Button from "@/components/ui/button/Button.vue";
 import Item from "@/components/ui/item/Item.vue";
 import { useSettingsStore } from "@/stores/settings";
@@ -21,32 +21,6 @@ const selectedProfile = ref<string | null>(null);
 const loading = ref(true);
 const sortBy = ref<"date" | "price">("date");
 const filterState = ref<ProductState | "ALL">("ALL");
-const showOdooSettings = ref(false);
-const odooUrl = ref("");
-const odooApiKey = ref("");
-const odooApiPath = ref("/json/2");
-const exportingToOdoo = ref(false);
-const exportingProductId = ref<string | null>(null);
-
-async function loadOdooSettings() {
-  const url = (await storage.getItem("local:odooUrl")) as string | undefined;
-  const apiKey = (await storage.getItem("local:odooApiKey")) as
-    | string
-    | undefined;
-  const apiPath = (await storage.getItem("local:odooApiPath")) as
-    | string
-    | undefined;
-  if (url) odooUrl.value = url;
-  if (apiKey) odooApiKey.value = apiKey;
-  if (apiPath) odooApiPath.value = apiPath;
-}
-
-async function saveOdooSettings() {
-  await storage.setItem("local:odooUrl", odooUrl.value);
-  await storage.setItem("local:odooApiKey", odooApiKey.value);
-  await storage.setItem("local:odooApiPath", odooApiPath.value);
-  showOdooSettings.value = false;
-}
 
 const sortedAndFilteredProducts = computed(() => {
   return settings.getCombinedProducts(

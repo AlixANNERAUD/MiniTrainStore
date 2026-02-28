@@ -1,5 +1,6 @@
-import { ProductDetail } from "../product";
+import { ProductDetail } from "../settings";
 import { getProductIdentifierFromUrl } from "./location";
+import { extractUsernameFromProductPage } from "./parsing";
 
 async function waitForProductPageLoad(): Promise<void> {
   // Wait for ad details to load
@@ -26,13 +27,15 @@ async function waitForProductPageLoad(): Promise<void> {
 }
 
 export async function scrapeProductDetails(): Promise<ProductDetail> {
-  const adId = getProductIdentifierFromUrl(new URL(window.location.href));
+  const productIdentifier = getProductIdentifierFromUrl(
+    new URL(window.location.href),
+  );
 
-  if (!adId) {
+  if (!productIdentifier) {
     throw new Error("Could not extract ad ID from URL");
   }
 
-  const username = extractUsernameFromAdPage();
+  const username = extractUsernameFromProductPage();
   if (!username) {
     console.log(
       "Could not extract username from ad page. Skipping detail scraping.",
@@ -43,12 +46,12 @@ export async function scrapeProductDetails(): Promise<ProductDetail> {
   const response = await browser.runtime.sendMessage({
     type: "CHECK_LISTING_EXISTS",
     username,
-    adId,
+    adId: productIdentifier,
   });
 
   if (!response || !response.exists) {
     console.log(
-      `Ad ${adId} not found in listings for ${username}. Skipping detail scraping.`,
+      `Ad ${productIdentifier} not found in listings for ${username}. Skipping detail scraping.`,
     );
     detailsScraped = true; // Mark as scraped to avoid re-checking
     return;
@@ -58,23 +61,27 @@ export async function scrapeProductDetails(): Promise<ProductDetail> {
   const detailsResponse = await browser.runtime.sendMessage({
     type: "CHECK_DETAILS_EXIST",
     username,
-    adId,
+    adId: productIdentifier,
   });
 
   if (detailsResponse && detailsResponse.exists) {
-    console.log(`Details already exist for ad ${adId}. Skipping scraping.`);
+    console.log(
+      `Details already exist for ad ${productIdentifier}. Skipping scraping.`,
+    );
     detailsScraped = true;
     return;
   }
 
-  console.log(`Scraping details for ad ${adId} from seller ${username}`);
+  console.log(
+    `Scraping details for ad ${productIdentifier} from seller ${username}`,
+  );
 
   try {
     const description = getDescription();
     const photos = await getPhotoUrls();
 
     const detail: ProductDetail = {
-      id: adId,
+      id: productIdentifier,
       description,
       photos,
       scrapedAt: new Date().toISOString(),

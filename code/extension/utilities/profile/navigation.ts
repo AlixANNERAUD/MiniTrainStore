@@ -1,5 +1,5 @@
 import { useSettingsStore } from "@/stores/settings";
-import { ProductListing } from "@/utilities/product";
+import { ProductListing } from "@/utilities/settings";
 import {
   getProfilePaginationButton,
   getProfilePaginationButtons,

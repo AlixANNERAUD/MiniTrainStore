@@ -1,23 +1,15 @@
 import {
   CombinedProduct,
-  OdooExportStatus,
+  OdooSettings,
   ProductDetail,
   ProductListing,
   ProductState,
   ProductUpdateStatistics,
   ProfileData,
-} from "@/utilities/product";
+} from "@/utilities/settings";
 import { defineWxtStore } from "@/utilities/wxt-store";
 
 export const SETTINGS_KEY = "miniTrainStoreSettings";
-
-export interface SettingsData {
-  profiles: Record<string, ProfileData>;
-}
-
-const defaultSettings: SettingsData = {
-  profiles: {},
-};
 
 export const useSettingsStore = defineWxtStore(SETTINGS_KEY, {
   state: () => defaultSettings,

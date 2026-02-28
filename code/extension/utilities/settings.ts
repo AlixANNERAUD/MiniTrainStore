@@ -52,3 +52,21 @@ export interface ProfileData {
   odooExports: Record<string, OdooExportStatus>; // keyed by product ID
   lastScraped: string; // ISO date string
 }
+
+export interface OdooSettings {
+  url: string;
+  apiKey: string;
+}
+
+export interface SettingsData {
+  odoo: OdooSettings;
+  profiles: Record<string, ProfileData>;
+}
+
+export const DEFAULT_SETTINGS: SettingsData = {
+  odoo: {
+    url: "",
+    apiKey: "",
+  },
+  profiles: {},
+};

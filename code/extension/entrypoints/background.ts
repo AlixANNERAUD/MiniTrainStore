@@ -1,4 +1,4 @@
-import { createOdooService, OdooConfig } from "@/services/odoo";
+import { createOdooService, OdooConfig } from "@/utilities/odoo";
 
 export default defineBackground(() => {
   console.log("Background script started", { id: browser.runtime.id });

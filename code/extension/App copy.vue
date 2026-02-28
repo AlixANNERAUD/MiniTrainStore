@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed } from "vue";
-import { ProductState, ProfileData } from "@/utilities/product";
+import { ProductState, ProfileData } from "@/utilities/settings";
 import Button from "@/components/ui/button/Button.vue";
 import Item from "@/components/ui/item/Item.vue";
 import { useSettingsStore } from "@/stores/settings";

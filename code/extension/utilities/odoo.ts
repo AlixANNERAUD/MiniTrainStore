@@ -1,4 +1,4 @@
-import { Product, ProductState } from "@/utilities/product";
+import { Product, ProductState } from "@/utilities/settings";
 
 // Constants and mappings from Python script
 const TAGS_MAP: Record<string, string[]> = {

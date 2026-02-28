@@ -7,7 +7,7 @@ import {
   ProductListing,
   ProductDetail,
   ProductState,
-} from "@/utilities/product";
+} from "@/utilities/settings";
 import {
   scrapeAllProfilePages,
   waitForProfilePageLoad,

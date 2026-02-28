@@ -1,4 +1,4 @@
-import { ProductListing, ProductState } from "../product";
+import { ProductListing, ProductState } from "../settings";
 import { getProductIdentifierFromUrl } from "../product/location";
 
 export function parseProfileName(): string | null {
