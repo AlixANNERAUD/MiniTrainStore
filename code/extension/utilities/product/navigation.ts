@@ -1,8 +1,14 @@
+import { useSettingsStore } from "@/stores/settings";
 import { ProductDetail } from "../settings";
 import { getProductIdentifierFromUrl } from "./location";
-import { extractUsernameFromProductPage } from "./parsing";
+import {
+  extractUsernameFromProductPage,
+  getPhotoUrls,
+  parseProductDetails,
+} from "./parsing";
+import { getDescription } from "../profile/parsing";
 
-async function waitForProductPageLoad(): Promise<void> {
+export async function waitForProductPageLoad(): Promise<void> {
   // Wait for ad details to load
   return new Promise((resolve) => {
     const checkContent = () => {
@@ -26,7 +32,9 @@ async function waitForProductPageLoad(): Promise<void> {
   });
 }
 
-export async function scrapeProductDetails(): Promise<ProductDetail> {
+export async function scrapeProductDetails() {
+  const settings = useSettingsStore();
+
   const productIdentifier = getProductIdentifierFromUrl(
     new URL(window.location.href),
   );
@@ -35,70 +43,29 @@ export async function scrapeProductDetails(): Promise<ProductDetail> {
     throw new Error("Could not extract ad ID from URL");
   }
 
-  const username = extractUsernameFromProductPage();
-  if (!username) {
-    console.log(
-      "Could not extract username from ad page. Skipping detail scraping.",
-    );
-  }
+  const product = settings.getProduct(productIdentifier);
 
-  // Check if this ad exists in the listings for this username
-  const response = await browser.runtime.sendMessage({
-    type: "CHECK_LISTING_EXISTS",
-    username,
-    adId: productIdentifier,
-  });
-
-  if (!response || !response.exists) {
+  // Check if product exists without details
+  if (!product || product.detail) {
     console.log(
-      `Ad ${productIdentifier} not found in listings for ${username}. Skipping detail scraping.`,
+      `Product ${productIdentifier} already has details or does not exist. Skipping scraping.`,
     );
-    detailsScraped = true; // Mark as scraped to avoid re-checking
     return;
   }
-
-  // Check if details already exist
-  const detailsResponse = await browser.runtime.sendMessage({
-    type: "CHECK_DETAILS_EXIST",
-    username,
-    adId: productIdentifier,
-  });
-
-  if (detailsResponse && detailsResponse.exists) {
-    console.log(
-      `Details already exist for ad ${productIdentifier}. Skipping scraping.`,
-    );
-    detailsScraped = true;
-    return;
-  }
-
-  console.log(
-    `Scraping details for ad ${productIdentifier} from seller ${username}`,
-  );
 
   try {
-    const description = getDescription();
-    const photos = await getPhotoUrls();
-
-    const detail: ProductDetail = {
-      id: productIdentifier,
-      description,
-      photos,
-      scrapedAt: new Date().toISOString(),
-    };
+    const detail = await parseProductDetails();
 
     console.log("Scraped details:", {
-      description: description.substring(0, 100),
-      photoCount: photos.length,
+      description: detail.description.substring(0, 100),
+      photoCount: detail.photos.length,
     });
 
-    await saveProductDetails(username, detail);
-    detailsScraped = true;
+    settings.updateProductDetail(productIdentifier, detail);
 
-    showNotification(
-      `Détails de l'annonce sauvegardés (${photos.length} photos)`,
-    );
+    return detail;
   } catch (error) {
     console.error("Error scraping ad details:", error);
+    return null;
   }
 }

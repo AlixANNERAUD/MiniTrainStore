@@ -1,5 +1,6 @@
 import { ProductListing, ProductState } from "../settings";
 import { getProductIdentifierFromUrl } from "../product/location";
+import * as chrono from "chrono-node";
 
 export function parseProfileName(): string | null {
   // Try multiple selectors for the profile name
@@ -19,40 +20,6 @@ export function parseProfileName(): string | null {
   return null;
 }
 
-export function getDescription(): string {
-  // Try multiple selectors for description
-  const selectors = [
-    '[data-qa-id="adview_description_container"]',
-    'div[data-test-id="description"]',
-    "#readme-content",
-  ];
-
-  for (const selector of selectors) {
-    const elem = document.querySelector(selector);
-    if (elem) {
-      // Check for "See more" button and click it
-      const seeMoreButtons = Array.from(document.querySelectorAll("button"));
-      const seeMoreButton = seeMoreButtons.find(
-        (btn) =>
-          btn.textContent?.includes("Voir plus") ||
-          btn.textContent?.includes("See more"),
-      );
-
-      if (seeMoreButton) {
-        try {
-          seeMoreButton.click();
-        } catch (e) {
-          console.log("Could not click see more button:", e);
-        }
-      }
-
-      return elem.textContent?.trim() || "";
-    }
-  }
-
-  return "";
-}
-
 export function parseProduct(article: Element): {
   identifier: string;
   product: ProductListing;
@@ -68,13 +35,6 @@ export function parseProduct(article: Element): {
       : "N/A";
 
     const identifier = getProductIdentifierFromUrl(new URL(fullUrl));
-
-    console.log(
-      "Parsing product with URL:",
-      fullUrl,
-      "Extracted ID:",
-      identifier,
-    );
 
     if (!identifier) {
       throw new Error("Could not extract product identifier from URL");
@@ -97,9 +57,11 @@ export function parseProduct(article: Element): {
 
     // Check if the product is sold
     let state = ProductState.ACTIVE;
-    const soldBadge = article.querySelector('div[data-spark-component="tag"]');
-    if (soldBadge && soldBadge.textContent?.trim() === "Vendu") {
-      state = ProductState.SOLD;
+    const badge = article.querySelector('div[data-spark-component="tag"]');
+    if (badge && badge.textContent?.trim() === "Vendu") {
+      state = ProductState.PURCHASE_COMPLETED;
+    } else if (badge && badge.textContent?.trim() === "Achat en cours") {
+      state = ProductState.PURCHASE_PENDING;
     }
 
     // Get the date
@@ -113,23 +75,32 @@ export function parseProduct(article: Element): {
       console.error("Error parsing date:", e);
     }
 
-    // Parse the date string (format: DD/MM/YYYY)
+    // Parse the date string using chrono-node
     let date = new Date().toISOString();
-    if (datePosted !== "N/A") {
-      try {
-        const parts = datePosted.split("/");
-        if (parts.length === 3) {
-          const day = parseInt(parts[0], 10);
-          const month = parseInt(parts[1], 10) - 1; // Months are 0-indexed
-          const year = parseInt(parts[2], 10);
-          const parsedDate = new Date(year, month, day);
-          if (!isNaN(parsedDate.getTime())) {
-            date = parsedDate.toISOString();
-          }
-        }
-      } catch (e) {
-        console.error("Error parsing date string:", e);
+
+    try {
+      // Handle relative dates like "aujourd’hui", "hier", "jeudi dernier"
+      const chronoOptions = {
+        forwardDate: true,
+      };
+      const parsedDate = chrono.fr.parseDate(
+        datePosted,
+        new Date(),
+        chronoOptions,
+      );
+
+      if (parsedDate) {
+        date = parsedDate.toISOString();
+      } else {
+        console.warn(
+          "Could not parse date string with chrono-node, using current date:",
+          datePosted,
+        );
+        date = new Date().toISOString();
       }
+    } catch (e) {
+      console.error("Error parsing date string with chrono-node:", e);
+      date = new Date().toISOString();
     }
 
     return {
@@ -138,7 +109,6 @@ export function parseProduct(article: Element): {
         title,
         price,
         url: fullUrl,
-        datePosted,
         date,
         state,
         thumbnail,
@@ -170,7 +140,7 @@ export function parseProfilePage(): {
   articles.forEach((article) => {
     const product = parseProduct(article);
     if (product) {
-      products[product.identifier] = product;
+      products[product.identifier] = product.product;
     }
   });
 

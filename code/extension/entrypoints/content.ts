@@ -1,32 +1,31 @@
+import { parseProfilePage } from "@/utilities/profile/parsing";
 import {
-  parseProfileName,
-  parseProfilePage,
-  scrapeAdDetails,
-} from "@/utilities/profile/parsing";
-import {
-  ProductListing,
-  ProductDetail,
-  ProductState,
-} from "@/utilities/settings";
-import {
-  scrapeAllProfilePages,
   waitForProfilePageLoad,
+  scrapeProfileCurrentPage,
 } from "@/utilities/profile/navigation";
-import { extractProfileIdentifierFromUrl } from "@/utilities/profile/location";
+import { getProfileIdentifierFromUrl } from "@/utilities/profile/location";
 import { getProductIdentifierFromUrl } from "@/utilities/product/location";
 import { useSettingsStore } from "@/stores/settings";
+import {
+  scrapeProductDetails,
+  waitForProductPageLoad,
+} from "@/utilities/product/navigation";
+import { setupProfileButton } from "./content/profile-button";
+import { ContentScriptContext } from "wxt/utils/content-script-context";
+import { setupProductButton } from "./content/product-button";
 
 let isObserving = false;
-let detailsScraped = false;
+
+let profileButtonUi: ShadowRootContentScriptUi<void> | null = null;
+let productButtonUi: ShadowRootContentScriptUi<void> | null = null;
 
 export default defineContentScript({
   matches: ["*://*.leboncoin.fr/*"],
-  main() {
+  main(ctx) {
     console.log("Leboncoin scraper loaded");
 
     // Initial page check
-    checkAndHandlePage();
-
+    checkAndHandlePage(ctx);
     // Listen for URL changes (for SPA navigation)
     let lastUrl = location.href;
     new MutationObserver(() => {
@@ -35,40 +34,53 @@ export default defineContentScript({
         lastUrl = currentUrl;
         console.log("URL changed to:", currentUrl);
 
-        // Reset detailsScraped flag on URL change
-        detailsScraped = false;
-
         // Check the new page
-        checkAndHandlePage();
+        checkAndHandlePage(ctx);
       }
     }).observe(document, { subtree: true, childList: true });
   },
 });
 
-function checkAndHandlePage() {
+function checkAndHandlePage(ctx: ContentScriptContext) {
   // Check if we're on a profile page
-  let url = new URL(window.location.href);
+  const url = new URL(window.location.href);
 
-  const userIdentifier = extractProfileIdentifierFromUrl(url);
+  const userIdentifier = getProfileIdentifierFromUrl(url);
   const productIdentifier = getProductIdentifierFromUrl(url);
 
+  console.log("User Identifier:", userIdentifier);
+  console.log("Product Identifier:", productIdentifier);
+
   const settings = useSettingsStore();
+
+  if (profileButtonUi) {
+    profileButtonUi.remove();
+    profileButtonUi = null;
+  }
+
+  if (productButtonUi) {
+    productButtonUi.remove();
+    productButtonUi = null;
+  }
 
   if (userIdentifier) {
     console.log(`On profile page for user: ${userIdentifier}`);
 
     // Wait for page to load, then scrape automatically
     waitForProfilePageLoad().then(() => {
-      addScrapeButton(settings, userIdentifier);
-      autoScrape(settings, userIdentifier);
-      setupPaginationWatcher(settings, userIdentifier);
+      setupProfileButton(ctx).then((ui) => {
+        profileButtonUi = ui;
+      });
     });
   } else if (productIdentifier) {
     console.log("On ad detail page");
 
     // Wait for page to load, then scrape details
     waitForProductPageLoad().then(() => {
-      scrapeAdDetails();
+      setupProductButton(ctx).then((ui) => {
+        productButtonUi = ui;
+      });
+      scrapeProductDetails();
     });
   }
 }
@@ -81,10 +93,11 @@ function setupPaginationWatcher(
   isObserving = true;
 
   // Watch for new articles being added to the DOM
-  const observer = new MutationObserver((mutations) => {
-    const userIdentifier = extractProfileIdentifierFromUrl(
+  const observer = new MutationObserver(() => {
+    const userIdentifier = getProfileIdentifierFromUrl(
       new URL(window.location.href),
     );
+
     if (userIdentifier !== username) {
       console.log("Profile changed, stopping observer");
       observer.disconnect();
@@ -104,14 +117,14 @@ function setupPaginationWatcher(
       );
 
       if (Object.keys(products).length > 0) {
-        const stats = await settings.updateProductListing(username, products);
+        await settings.updateProductListing(username, products.products);
 
-        if (stats.added > 0 || stats.updated > 0) {
-          showNotification(
-            `${stats.updated} mis à jour / ${stats.added} ajouté${stats.added > 1 ? "s" : ""}`,
-          );
-          console.log(`📄 ${stats.added} added, ${stats.updated} updated`);
-        }
+        // if (stats.added > 0 || stats.updated > 0) {
+        //   showNotification(
+        //     `${stats.updated} mis à jour / ${stats.added} ajouté${stats.added > 1 ? "s" : ""}`,
+        //   );
+        //   console.log(`📄 ${stats.added} added, ${stats.updated} updated`);
+        // }
       }
     }, 1000);
   });
@@ -124,106 +137,6 @@ function setupPaginationWatcher(
   });
 
   console.log("👁️ Watching for pagination changes...");
-}
-
-function addScrapeButton(
-  settings: ReturnType<typeof useSettingsStore>,
-  username: string,
-) {
-  // Remove existing button if any
-  const existingButton = document.getElementById("leboncoin-scraper-button");
-  if (existingButton) {
-    existingButton.remove();
-  }
-
-  const button = document.createElement("button");
-  button.id = "leboncoin-scraper-button";
-  button.innerHTML = `
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="margin-right: 6px;">
-      <path d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2z"/>
-    </svg>
-    Scraper cette page
-  `;
-  button.style.cssText = `
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 10000;
-    padding: 12px 20px;
-    background: #ff6e14;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(255, 110, 20, 0.3);
-    display: flex;
-    align-items: center;
-    transition: all 0.2s;
-  `;
-
-  button.addEventListener("mouseenter", () => {
-    button.style.transform = "translateY(-2px)";
-    button.style.boxShadow = "0 6px 16px rgba(255, 110, 20, 0.4)";
-  });
-
-  button.addEventListener("mouseleave", () => {
-    button.style.transform = "translateY(0)";
-    button.style.boxShadow = "0 4px 12px rgba(255, 110, 20, 0.3)";
-  });
-
-  button.addEventListener("click", async () => {
-    button.disabled = true;
-    button.innerHTML =
-      '<div style="width: 16px; height: 16px; border: 2px solid white; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 6px;"></div> Scraping...';
-
-    // Add animation
-    const style = document.createElement("style");
-    style.textContent = "@keyframes spin { to { transform: rotate(360deg); } }";
-    document.head.appendChild(style);
-
-    // Scrape all pages with pagination
-    const allProducts = await scrapeAllProfilePages(username, (page, total) => {
-      button.innerHTML = `<div style="width: 16px; height: 16px; border: 2px solid white; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 6px;"></div> Page ${page}/${total}...`;
-    });
-
-    const stats = await settings.updateProductListing(username, allProducts);
-
-    button.innerHTML = `✓ ${stats.added} ajouté${stats.added > 1 ? "s" : ""} / ${stats.updated} MAJ`;
-    setTimeout(() => {
-      button.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="margin-right: 6px;"><path d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2z"/></svg>Scraper cette page`;
-      button.disabled = false;
-    }, 2000);
-  });
-
-  document.body.appendChild(button);
-}
-
-async function autoScrape(
-  settings: ReturnType<typeof useSettingsStore>,
-  userIdentifier: string,
-) {
-  console.log(`Auto-scraping profile: ${userIdentifier}`);
-
-  const profileData = parseProfilePage();
-
-  if (profileData.products && Object.keys(profileData.products).length > 0) {
-    const stats = await settings.updateProductListing(
-      userIdentifier,
-      profileData.username,
-      profileData.products,
-      true,
-    );
-    console.log(
-      `✓ Saved products for ${profileData.username}: ${stats.added} added, ${stats.updated} updated`,
-    );
-    if (stats.added > 0 || stats.updated > 0) {
-      showNotification(
-        `${stats.updated} mis à jour / ${stats.added} ajouté${stats.added > 1 ? "s" : ""}`,
-      );
-    }
-  }
 }
 
 function showNotification(message: string) {

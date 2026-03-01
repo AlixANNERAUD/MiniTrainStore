@@ -534,7 +534,7 @@ class OdooService {
       } else {
         // Product exists
         if (
-          product.state === ProductState.SOLD ||
+          product.state === ProductState.PURCHASE_COMPLETED ||
           product.state === ProductState.REMOVED
         ) {
           // Archive the product

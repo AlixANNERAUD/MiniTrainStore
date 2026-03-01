@@ -1,153 +1,55 @@
 <script lang="ts" setup>
-import { ref, onMounted, computed } from "vue";
-import { ProductState, ProfileData } from "@/utilities/settings";
-import Button from "@/components/ui/button/Button.vue";
-import Item from "@/components/ui/item/Item.vue";
-import { useSettingsStore } from "@/stores/settings";
 import Card from "@/components/ui/card/Card.vue";
 import CardHeader from "@/components/ui/card/CardHeader.vue";
 import CardTitle from "@/components/ui/card/CardTitle.vue";
 import CardDescription from "@/components/ui/card/CardDescription.vue";
 import CardContent from "@/components/ui/card/CardContent.vue";
-import ItemMedia from "@/components/ui/item/ItemMedia.vue";
-import ItemContent from "@/components/ui/item/ItemContent.vue";
-import ItemTitle from "@/components/ui/item/ItemTitle.vue";
-import ItemDescription from "@/components/ui/item/ItemDescription.vue";
-import ItemActions from "@/components/ui/item/ItemActions.vue";
+
+import Separator from "@/components/ui/separator/Separator.vue";
+import { TrainFront } from "lucide-vue-next";
+import Tabs from "@/components/ui/tabs/Tabs.vue";
+import TabsList from "@/components/ui/tabs/TabsList.vue";
+import TabsTrigger from "@/components/ui/tabs/TabsTrigger.vue";
+import TabsContent from "@/components/ui/tabs/TabsContent.vue";
+import ProductsTab from "@/components/ProductsTab.vue";
+import SettingsTab from "@/components/SettingsTab.vue";
+import { useSettingsStore } from "@/stores/settings";
 
 const settings = useSettingsStore();
 
-const selectedProfile = ref<string | null>(null);
-const loading = ref(true);
-const sortBy = ref<"date" | "price">("date");
-const filterState = ref<ProductState | "ALL">("ALL");
-
-const sortedAndFilteredProducts = computed(() => {
-  return settings.getCombinedProducts(
-    selectedProfile.value || "",
-    {
-      state: filterState.value === "ALL" ? undefined : filterState.value,
-    },
-    sortBy.value,
-  );
-});
-
-function formatPrice(price: number): string {
-  return `${price.toLocaleString("fr-FR")} €`;
-}
-
-function formatDate(dateStr: string): string {
-  try {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("fr-FR", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  } catch {
-    return dateStr;
-  }
-}
-
-function formatDateTime(dateStr: string): string {
-  try {
-    const date = new Date(dateStr);
-    return date.toLocaleString("fr-FR", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return dateStr;
-  }
-}
-
-async function clearCurrentProfile() {
-  if (!selectedProfile.value) return;
-
-  if (
-    confirm(
-      `Voulez-vous vraiment supprimer le profil ${selectedProfile.value} et ses annonces ?`,
-    )
-  ) {
-    settings.clearProfileData(selectedProfile.value);
-  }
-}
-
-function openUrl(url: string) {
-  browser.tabs.create({ url });
-}
-
-async function downloadRawData() {
-  try {
-    const dataStr = JSON.stringify(settings.export(), null, 2);
-    const blob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `leboncoin-scraper-${new Date().toISOString().split("T")[0]}.json`;
-    a.click();
-
-    URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error("Error downloading data:", error);
-  }
-}
+const tabs = ["Produits", "Réglages"];
 </script>
 
 <template>
-  <Button variant="outline"> Button </Button>
-  <div
-    class="min-w-[700px] max-w-[900px] min-h-[500px] max-h-[500px] flex flex-col overflow-hidden"
-  >
-    <Card>
-      <CardHeader>
-        <CardTitle>Mini Train Store</CardTitle>
-        <CardDescription>Gestion des profils et des annonces</CardDescription>
-      </CardHeader>
-
-      <CardContent>
-        <Item
-          v-for="product in sortedAndFilteredProducts"
-          :key="product.identifier"
-          variant="outline"
-          as-child
-          role="listitem"
-        >
-          <ItemMedia variant="image">
-            <img
-              :src="product.listing.thumbnail"
-              :alt="product.listing.title"
-              width="100"
-              height="100"
-            />
-          </ItemMedia>
-          <ItemContent>
-            <ItemTitle class="line-clamp-1">{{
-              product.listing.title
-            }}</ItemTitle>
-            <ItemDescription>{{
-              formatPrice(product.listing.price)
-            }}</ItemDescription>
-          </ItemContent>
-          <ItemActions>
-            <Button
-              variant="outline"
-              size="sm"
-              @click="openUrl(product.listing.url)"
-            >
-              Voir l'annonce
-            </Button>
-          </ItemActions>
-        </Item>
-      </CardContent>
-    </Card>
-  </div>
+  <Card class="w-200">
+    <CardHeader>
+      <TrainFront class="w-6 h-6 mr-2" />
+      <CardTitle>Mini Train Store</CardTitle>
+      <CardDescription>Gestion des profils et des annonces</CardDescription>
+    </CardHeader>
+    <CardContent class="space-y-4">
+      <Tabs
+        v-model="settings.currentTab.value"
+        :default-value="0"
+        class="w-full"
+      >
+        <TabsList class="w-full">
+          <TabsTrigger
+            v-for="[index, tab] in tabs.entries()"
+            :key="index"
+            :value="index"
+          >
+            {{ tab }}
+          </TabsTrigger>
+        </TabsList>
+        <Separator />
+        <TabsContent :value="0">
+          <ProductsTab />
+        </TabsContent>
+        <TabsContent :value="1">
+          <SettingsTab />
+        </TabsContent>
+      </Tabs>
+    </CardContent>
+  </Card>
 </template>
-
-<style scoped>
-/* Additional custom styles if needed */
-</style>

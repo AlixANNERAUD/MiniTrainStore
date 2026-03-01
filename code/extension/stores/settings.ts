@@ -1,32 +1,57 @@
 import {
   CombinedProduct,
-  OdooSettings,
+  DEFAULT_SETTINGS,
   ProductDetail,
   ProductListing,
   ProductState,
   ProductUpdateStatistics,
   ProfileData,
+  SettingsData,
 } from "@/utilities/settings";
 import { defineWxtStore } from "@/utilities/wxt-store";
 
 export const SETTINGS_KEY = "miniTrainStoreSettings";
 
 export const useSettingsStore = defineWxtStore(SETTINGS_KEY, {
-  state: () => defaultSettings,
+  state: () => DEFAULT_SETTINGS,
   actions: (state) => ({
+    addProfile(userIdentifier: string, displayName: string) {
+      state.profiles[userIdentifier] = {
+        displayName,
+        listings: {},
+        details: {},
+        odooExports: {},
+        lastScraped: new Date().toISOString(),
+      };
+    },
+    isProfileAdded(userIdentifier: string): boolean {
+      return !!state.profiles[userIdentifier];
+    },
+    getProduct(productIdentifier: string): CombinedProduct | null {
+      for (const profile of Object.values(state.profiles)) {
+        if (profile.listings[productIdentifier]) {
+          return {
+            identifier: productIdentifier,
+            listing: profile.listings[productIdentifier],
+            detail: profile.details[productIdentifier],
+            odooExport: profile.odooExports
+              ? profile.odooExports[productIdentifier]
+              : undefined,
+          };
+        }
+      }
+      return null;
+    },
     updateProductListing(
       userIdentifier: string,
-      displayName: string,
       listing: Record<string, ProductListing>,
       markMissingAsRemoved = false,
     ): ProductUpdateStatistics {
       if (!state.profiles[userIdentifier]) {
-        state.profiles[userIdentifier] = {
-          displayName: displayName,
-          listings: {},
-          details: {},
-          odooExports: {},
-          lastScraped: new Date().toISOString(),
+        return {
+          added: 0,
+          updated: 0,
+          removed: 0,
         };
       }
 
@@ -64,12 +89,12 @@ export const useSettingsStore = defineWxtStore(SETTINGS_KEY, {
         removed: markMissingAsRemoved ? removed.size : 0,
       };
     },
-    updateProductDetail(
-      userIdentifier: string,
-      productIdentifier: string,
-      detail: ProductDetail,
-    ) {
-      state.profiles[userIdentifier].details[productIdentifier] = detail;
+    updateProductDetail(productIdentifier: string, detail: ProductDetail) {
+      Object.values(state.profiles).forEach((profile) => {
+        if (profile.listings[productIdentifier]) {
+          profile.details[productIdentifier] = detail;
+        }
+      });
     },
     getProfileIdentifiers(): string[] {
       return Object.keys(state.profiles);
@@ -77,15 +102,8 @@ export const useSettingsStore = defineWxtStore(SETTINGS_KEY, {
     getProfile(identifier: string): ProfileData | null {
       return state.profiles[identifier] || null;
     },
-    getCombinedProducts(
-      username: string,
-
-      filters?: {
-        state?: ProductState;
-      },
-      orderBy?: "date" | "price",
-    ): CombinedProduct[] {
-      const profile = state.profiles[username];
+    getCombinedProducts(userIdentifier: string): CombinedProduct[] {
+      const profile = state.profiles[userIdentifier];
       if (!profile) {
         return [];
       }
@@ -98,23 +116,6 @@ export const useSettingsStore = defineWxtStore(SETTINGS_KEY, {
           odooExport: profile.odooExports ? profile.odooExports[id] : undefined,
         }),
       );
-
-      const filtered = combined.filter((p) => {
-        if (filters?.state && p.listing.state !== filters.state) {
-          return false;
-        }
-        return true;
-      });
-
-      if (orderBy === "date") {
-        filtered.sort((a, b) => {
-          const dateA = new Date(a.listing.datePosted).getTime();
-          const dateB = new Date(b.listing.datePosted).getTime();
-          return dateB - dateA; // Newest first
-        });
-      } else if (orderBy === "price") {
-        filtered.sort((a, b) => a.listing.price - b.listing.price); // Lowest price first
-      }
 
       return combined;
     },

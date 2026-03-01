@@ -23,24 +23,40 @@ export async function waitForProfilePageLoad(): Promise<void> {
   });
 }
 
-export async function scrapeCurrentProfilePage(
+export async function scrapeProfileCurrentPage(
+  settings: ReturnType<typeof useSettingsStore>,
   userIdentifier: string,
-): Promise<Record<string, ProductListing>> {
-  const products = parseProfilePage();
-
-  if (Object.keys(products).length > 0) {
-    await settings.updateProductListing(userIdentifier, products, true);
+) {
+  if (!settings.isProfileAdded(userIdentifier)) {
+    console.log("Profile not added, skipping auto-scrape");
+    return;
   }
 
-  return products;
+  console.log(`Auto-scraping profile: ${userIdentifier}`);
+
+  const profileData = parseProfilePage();
+
+  if (profileData.products && Object.keys(profileData.products).length > 0) {
+    const stats = await settings.updateProductListing(
+      userIdentifier,
+      profileData.products,
+      true,
+    );
+    console.log(
+      `✓ Saved products for ${profileData.username}: ${stats.added} added, ${stats.updated} updated`,
+    );
+    // if (stats.added > 0 || stats.updated > 0) {
+    //   showNotification(
+    //     `${stats.updated} mis à jour / ${stats.added} ajouté${stats.added > 1 ? "s" : ""}`,
+    //   );
+    // }
+  }
 }
 
-export async function scrapeAllProfilePages(
-  username: string,
-  onProgress?: (current: number, total: number) => void,
-): Promise<Record<string, ProductListing>> {
+export async function scrapeProfileAllPages() {
+  const settings = useSettingsStore();
+
   const allProducts: Record<string, ProductListing> = {};
-  const scrapedIdsSet = new Set<string>();
 
   const pageButtons = getProfilePaginationButtons();
   const totalPages = pageButtons.length;
@@ -48,34 +64,33 @@ export async function scrapeAllProfilePages(
   console.log(`Found ${totalPages} pages to scrape`);
 
   for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
-    onProgress?.(pageNum, totalPages);
+    // Navigate to next page if not the last one
+    const nextPageButton = getProfilePaginationButton(pageNum);
+    if (nextPageButton && !nextPageButton.disabled) {
+      nextPageButton.click();
+      // Wait for page to load
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    } else {
+      console.log("No next page button found or disabled");
+      break;
+    }
 
     // Scrape current page
-    const products = parseProfilePage();
+    const { products } = parseProfilePage();
 
     // Merge into allProducts
     Object.entries(products).forEach(([id, product]) => {
       allProducts[id] = product;
-      scrapedIdsSet.add(id);
     });
 
     console.log(
       `Scraped page ${pageNum}/${totalPages}: ${Object.keys(products).length} products`,
     );
-
-    // Navigate to next page if not the last one
-    if (pageNum < totalPages) {
-      const nextPageButton = getProfilePaginationButton(pageNum + 1);
-      if (nextPageButton && !nextPageButton.disabled) {
-        nextPageButton.click();
-        // Wait for page to load
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-      } else {
-        console.log("No next page button found or disabled");
-        break;
-      }
-    }
   }
 
-  return allProducts;
+  settings.updateProductListing(
+    settings.selectedProfile.value!,
+    allProducts,
+    true,
+  );
 }

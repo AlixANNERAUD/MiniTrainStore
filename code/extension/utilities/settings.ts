@@ -1,6 +1,12 @@
+export enum OrderBy {
+  DATE = "date",
+  PRICE = "price",
+}
+
 export enum ProductState {
   ACTIVE = "ACTIVE",
-  SOLD = "SOLD",
+  PURCHASE_PENDING = "PURCHASE_PENDING",
+  PURCHASE_COMPLETED = "PURCHASE_COMPLETED",
   REMOVED = "REMOVED",
 }
 
@@ -9,8 +15,7 @@ export interface ProductListing {
   title: string;
   price: number;
   url: string;
-  datePosted: string;
-  date: string; // ISO date string
+  date: string;
   state: ProductState;
   thumbnail: string; // Thumbnail image from listing card
   scrapedAt: string; // ISO date string - when this listing was scraped
@@ -61,6 +66,10 @@ export interface OdooSettings {
 export interface SettingsData {
   odoo: OdooSettings;
   profiles: Record<string, ProfileData>;
+  selectedProfile: string | null;
+  selectedFilter: ProductState | "ALL";
+  selectedOrderBy: OrderBy;
+  currentTab: 0;
 }
 
 export const DEFAULT_SETTINGS: SettingsData = {
@@ -69,4 +78,8 @@ export const DEFAULT_SETTINGS: SettingsData = {
     apiKey: "",
   },
   profiles: {},
+  selectedProfile: null,
+  selectedFilter: "ALL",
+  selectedOrderBy: OrderBy.DATE,
+  currentTab: 0,
 };
