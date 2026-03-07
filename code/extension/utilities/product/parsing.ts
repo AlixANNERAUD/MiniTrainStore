@@ -1,5 +1,4 @@
-import { getDescription } from "../profile/parsing";
-import { ProductDetail, ProductListing } from "../settings";
+import { ProductDetail } from "../settings";
 
 export function extractUsernameFromProductPage(): string | null {
   // Try to find the seller profile link

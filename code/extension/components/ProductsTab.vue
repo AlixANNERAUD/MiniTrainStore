@@ -181,7 +181,7 @@ const ProductStateColors: Record<ProductState, string> = {
           as-child
           role="listitem"
         >
-          <a href="#" @click.prevent="openUrl(product.listing.url)">
+          <a href="#">
             <ItemMedia variant="image">
               <img
                 :src="product.listing.thumbnail"
@@ -212,15 +212,18 @@ const ProductStateColors: Record<ProductState, string> = {
                 </Badge>
               </div>
               <div class="flex flex-col items-start gap-1">
-                <Badge
+                <Button
+                  variant="outline"
+                  size="sm"
                   :class="
                     product.detail
                       ? 'bg-green-100 text-green-800'
                       : 'bg-red-100 text-red-800'
                   "
+                  @click="openUrl(product.listing.url)"
                 >
                   Détails
-                </Badge>
+                </Button>
 
                 <Button
                   variant="outline"

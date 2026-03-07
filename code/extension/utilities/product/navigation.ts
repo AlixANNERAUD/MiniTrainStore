@@ -1,12 +1,6 @@
 import { useSettingsStore } from "@/stores/settings";
-import { ProductDetail } from "../settings";
 import { getProductIdentifierFromUrl } from "./location";
-import {
-  extractUsernameFromProductPage,
-  getPhotoUrls,
-  parseProductDetails,
-} from "./parsing";
-import { getDescription } from "../profile/parsing";
+import { parseProductDetails } from "./parsing";
 
 export async function waitForProductPageLoad(): Promise<void> {
   // Wait for ad details to load

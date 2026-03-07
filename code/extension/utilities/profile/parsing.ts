@@ -149,7 +149,7 @@ export function parseProfilePage(): {
 
 export function getProfilePaginationButtons(): HTMLButtonElement[] {
   return Array.from(
-    document.querySelectorAll('button[data-test-id="page-button"]'),
+    document.querySelectorAll('button[data-spark-component="pagination-item"]'),
   ) as HTMLButtonElement[];
 }
 
@@ -157,6 +157,6 @@ export function getProfilePaginationButton(
   pageNum: number,
 ): HTMLButtonElement | null {
   return document.querySelector(
-    `button[data-test-id="page-button"][title="Page ${pageNum}"]`,
+    `button[data-spark-component="pagination-item"][data-index="${pageNum}"]`,
   ) as HTMLButtonElement | null;
 }
