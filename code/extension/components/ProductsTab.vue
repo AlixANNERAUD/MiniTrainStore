@@ -182,12 +182,10 @@ const ProductStateColors: Record<ProductState, string> = {
           role="listitem"
         >
           <a href="#">
-            <ItemMedia variant="image">
+            <ItemMedia class="h-full w-24" variant="image">
               <img
                 :src="product.listing.thumbnail"
                 :alt="product.listing.title"
-                width="200"
-                height="200"
               />
             </ItemMedia>
             <ItemContent>
