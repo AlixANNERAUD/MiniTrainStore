@@ -10,6 +10,12 @@ const CATEGORY_ID_CACHE: Map<string, number> = new Map();
 const PUBLIC_CATEGORY_ID_CACHE: Map<string, number> = new Map();
 const TAX_ID_CACHE: Map<string, number> = new Map();
 
+export enum OdooProductState {
+  NOT_FOUND = "not_found",
+  EXISTS = "exists",
+  ACTIVE = "active",
+}
+
 export interface OdooConfig {
   url: string;
   apiKey: string;
@@ -90,9 +96,7 @@ async function requestOdoo(
 }
 
 function stringToHtml(str: string): string {
-  console.log("Original description:", str);
   str = str.replace("\\n", "<br/>").replace(/\n/g, "<br/>");
-  console.log("Formatted description:", str);
   return str;
 }
 
@@ -144,11 +148,6 @@ async function searchProduct(product: CombinedProduct): Promise<number | null> {
     });
 
     const records = SearchResponseSchema.parse(reponse);
-
-    console.log(
-      `Products found for article '${product.listing.title}':`,
-      records,
-    );
 
     if (!records || records.length === 0) {
       return null;

@@ -1,9 +1,4 @@
 <script setup lang="ts">
-import ItemMedia from "@/components/ui/item/ItemMedia.vue";
-import ItemContent from "@/components/ui/item/ItemContent.vue";
-import ItemTitle from "@/components/ui/item/ItemTitle.vue";
-import ItemDescription from "@/components/ui/item/ItemDescription.vue";
-import ItemActions from "@/components/ui/item/ItemActions.vue";
 import Select from "@/components/ui/select/Select.vue";
 import SelectTrigger from "@/components/ui/select/SelectTrigger.vue";
 import SelectValue from "@/components/ui/select/SelectValue.vue";
@@ -19,17 +14,18 @@ import {
   ProductStateLabels,
 } from "@/utilities/filtering";
 import { CombinedProduct, ProductState } from "@/utilities/settings";
-import Item from "@/components/ui/item/Item.vue";
+
 import Separator from "@/components/ui/separator/Separator.vue";
-import Badge from "@/components/ui/badge/Badge.vue";
+
 import Button from "@/components/ui/button/Button.vue";
 import { ArrowDownAZ, Eye, Filter, User } from "lucide-vue-next";
 import ButtonGroup from "./ui/button-group/ButtonGroup.vue";
 import { getProfileUrl } from "@/utilities/profile/location";
-import { getCategoryForProduct } from "@/utilities/category";
-import { getTagsForProduct } from "@/utilities/tag";
+
 import * as odoo from "@/utilities/odoo";
 import Spinner from "./ui/spinner/Spinner.vue";
+import ProductItem from "./ProductItem.vue";
+import { openUrl } from "@/utilities/browser";
 
 const settings = useSettingsStore();
 
@@ -47,11 +43,6 @@ const combinedProducts = computed(() =>
 );
 
 const sortedAndFilteredProducts = computed(() => {
-  console.log(
-    "Computing sorted and filtered products for profile:",
-    settings.selectedProfile.value,
-  );
-
   if (!settings.selectedProfile.value) {
     return [];
   }
@@ -74,31 +65,6 @@ const productStatistics = computed(() =>
   getProductStatistics(combinedProducts.value),
 );
 
-watch(
-  sortedAndFilteredProducts,
-  (newProducts) => {
-    console.log("Sorted and filtered products updated:", newProducts);
-  },
-  { deep: true },
-);
-
-function formatDate(dateStr: string): string {
-  try {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("fr-FR", {
-      day: "numeric",
-      month: "numeric",
-      year: "numeric",
-    });
-  } catch {
-    return dateStr;
-  }
-}
-
-function openUrl(url: string) {
-  browser.tabs.create({ url });
-}
-
 function openProfileUrl() {
   openUrl(getProfileUrl(settings.selectedProfile.value || ""));
 }
@@ -106,36 +72,6 @@ function openProfileUrl() {
 const odooProducts = ref<Map<string, boolean>>(new Map());
 
 const isLoading = ref(false);
-
-const loadingProducts = ref<Set<string>>(new Set());
-
-async function exportProduct(product: CombinedProduct) {
-  if (loadingProducts.value.has(product.identifier)) {
-    return; // Prevent multiple clicks
-  }
-
-  loadingProducts.value.add(product.identifier);
-
-  await odoo
-    .exportProduct(product)
-    .then(() => {
-      // Refresh Odoo products after export
-      return odoo.getAllProducts();
-    })
-    .then((products) => {
-      const productMap = new Map<string, boolean>();
-      products.forEach((product) => {
-        productMap.set(product.identifier, product.active);
-      });
-      odooProducts.value = productMap;
-    })
-    .catch((error) => {
-      console.error("Error exporting product:", error);
-    })
-    .finally(() => {
-      loadingProducts.value.delete(product.identifier);
-    });
-}
 
 async function updateOdooProducts() {
   isLoading.value = true;
@@ -159,23 +95,23 @@ async function updateOdooProducts() {
 }
 
 onMounted(async () => {
-  await updateOdooProducts();
+  updateOdooProducts().catch((error) => {
+    console.error("Error during initial Odoo products fetch:", error);
+  });
 });
 
-function productExistsInOdoo(product: CombinedProduct): boolean {
-  return odooProducts.value.has(product.identifier);
-}
+function getOdooProductState(product: CombinedProduct): odoo.OdooProductState {
+  const existsInOdoo = odooProducts.value.has(product.identifier);
+  const isActiveInOdoo = odooProducts.value.get(product.identifier);
 
-function productIsActiveInOdoo(product: CombinedProduct): boolean {
-  return odooProducts.value.get(product.identifier) || false;
+  if (!existsInOdoo) {
+    return odoo.OdooProductState.NOT_FOUND;
+  } else if (isActiveInOdoo) {
+    return odoo.OdooProductState.ACTIVE;
+  } else {
+    return odoo.OdooProductState.EXISTS;
+  }
 }
-
-const ProductStateColors: Record<ProductState, string> = {
-  [ProductState.ACTIVE]: "bg-green-100 text-green-800",
-  [ProductState.PURCHASE_PENDING]: "bg-yellow-100 text-yellow-800",
-  [ProductState.PURCHASE_COMPLETED]: "bg-yellow-100 text-yellow-800",
-  [ProductState.REMOVED]: "bg-red-100 text-red-800",
-};
 </script>
 
 <template>
@@ -247,96 +183,13 @@ const ProductStateColors: Record<ProductState, string> = {
 
     <ScrollArea class="h-100 w-full">
       <ItemGroup class="gap-4">
-        <Item
+        <ProductItem
           v-for="product in sortedAndFilteredProducts"
           :key="product.identifier"
-          variant="outline"
-          as-child
-          role="listitem"
-        >
-          <a href="#">
-            <ItemMedia class="h-full w-24" variant="image">
-              <img
-                :src="product.listing.thumbnail"
-                :alt="product.listing.title"
-              />
-            </ItemMedia>
-            <ItemContent>
-              <ItemTitle class="line-clamp-1">
-                {{ product.listing.title }}
-              </ItemTitle>
-              <ItemDescription>{{
-                product.detail?.description
-              }}</ItemDescription>
-              <ItemDescription class="text-sm text-muted-foreground">
-                Catégorie :
-                <Badge variant="outline">
-                  {{ getCategoryForProduct(product) }}
-                </Badge>
-              </ItemDescription>
-              <ItemDescription class="text-sm text-muted-foreground">
-                Étiquettes :
-                <Badge
-                  v-for="tag in getTagsForProduct(product)"
-                  :key="tag"
-                  variant="outline"
-                >
-                  {{ tag }}
-                </Badge>
-              </ItemDescription>
-            </ItemContent>
-            <ItemActions>
-              <div class="flex flex-col items-end gap-1">
-                <Badge :class="ProductStateColors[product.listing.state]">
-                  {{
-                    ProductStateLabels[product.listing.state] ||
-                    product.listing.state
-                  }}
-                </Badge>
-                <Badge variant="outline"> {{ product.listing.price }} € </Badge>
-                <Badge variant="outline">
-                  {{ formatDate(product.listing.date) }}
-                </Badge>
-              </div>
-              <div class="flex flex-col items-start gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  :class="
-                    product.detail
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
-                  "
-                  @click="openUrl(product.listing.url)"
-                >
-                  Détails
-                </Button>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  :class="[
-                    'w-full',
-                    'justify-center',
-                    productExistsInOdoo(product) &&
-                    productIsActiveInOdoo(product)
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800',
-                  ]"
-                  :disabled="!product.detail"
-                  @click="exportProduct(product)"
-                >
-                  <Spinner
-                    v-if="loadingProducts.has(product.identifier)"
-                    class="w-4 h-4"
-                  />
-                  <span v-if="productExistsInOdoo(product)">Mettre à jour</span>
-                  <span v-else>Odoo</span>
-                </Button>
-              </div>
-            </ItemActions>
-          </a>
-        </Item>
+          :product="product"
+          :odoo-state="getOdooProductState(product)"
+          @export-product="updateOdooProducts"
+        />
       </ItemGroup>
     </ScrollArea>
   </div>

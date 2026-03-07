@@ -48,20 +48,11 @@ export function filterAndSortProducts(
       const dateA = new Date(a.listing.date).getTime();
       const dateB = new Date(b.listing.date).getTime();
 
-      console.log(
-        `Comparing dates for sorting: ${a.listing.title} (${a.listing.date}) vs ${b.listing.title} (${b.listing.date}) => ${dateA} vs ${dateB}`,
-      );
-
       return dateB - dateA; // Newest first
     });
   } else if (orderBy === "price") {
     filtered = filtered.sort((a, b) => a.listing.price - b.listing.price); // Lowest price first
   }
 
-  console.log(
-    `Getting combined products with filters ${JSON.stringify(
-      filters,
-    )} and orderBy ${orderBy}. Found ${filtered.length} products.`,
-  );
   return filtered;
 }

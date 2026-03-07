@@ -30,11 +30,6 @@ function addProfile() {
     return;
   }
 
-  console.log("Adding profile:", {
-    identifier: currentUserIdentifier,
-    name: profileName,
-  });
-
   settings.addProfile(currentUserIdentifier, profileName);
 }
 

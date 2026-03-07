@@ -15,9 +15,6 @@ const isLoading = ref(false);
 
 const product = settings.getProduct(currentProductIdentifier || "");
 
-console.log("Current product identifier:", currentProductIdentifier);
-console.log("Is product exist without details:", product);
-
 async function updateProductDetails() {
   if (!currentProductIdentifier) return;
 
@@ -26,8 +23,6 @@ async function updateProductDetails() {
   const product = await parseProductDetails().finally(() => {
     isLoading.value = false;
   });
-
-  console.log("Parsed product details:", product);
 
   settings.updateProductDetail(currentProductIdentifier, product);
 }
