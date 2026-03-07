@@ -63,33 +63,38 @@ export async function getPhotoUrls(): Promise<string[]> {
   return photos;
 }
 
+export function getSeeMoreButton(): HTMLButtonElement | null {
+  const seeMoreButtons = Array.from(document.querySelectorAll("button"));
+  const seeMoreButton = seeMoreButtons.find(
+    (btn) =>
+      btn.textContent?.includes("Voir plus") ||
+      btn.textContent?.includes("See more"),
+  ) as HTMLButtonElement | undefined;
+
+  return seeMoreButton || null;
+}
+
 export function getDescription(): string {
   // Try multiple selectors for description
+  // Check for "See more" button and click it
+  const seeMoreButton = getSeeMoreButton();
+
+  if (seeMoreButton) {
+    try {
+      seeMoreButton.click();
+    } catch (e) {
+      console.log("Could not click see more button:", e);
+    }
+  }
+
   const selectors = [
-    '[data-qa-id="adview_description_container"]',
-    'div[data-test-id="description"]',
-    "#readme-content",
+    'p[id="readme-content"]', // New selector for description
   ];
 
   for (const selector of selectors) {
     const elem = document.querySelector(selector);
+
     if (elem) {
-      // Check for "See more" button and click it
-      const seeMoreButtons = Array.from(document.querySelectorAll("button"));
-      const seeMoreButton = seeMoreButtons.find(
-        (btn) =>
-          btn.textContent?.includes("Voir plus") ||
-          btn.textContent?.includes("See more"),
-      );
-
-      if (seeMoreButton) {
-        try {
-          seeMoreButton.click();
-        } catch (e) {
-          console.log("Could not click see more button:", e);
-        }
-      }
-
       return elem.textContent?.trim() || "";
     }
   }

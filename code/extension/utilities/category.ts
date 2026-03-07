@@ -22,5 +22,12 @@ export function getCategoryForProduct(product: CombinedProduct): string | null {
     }
   }
 
+  // If no match without prefix, try with full title as fallback
+  for (const cat of COMPILED_CATEGORIES.value) {
+    if (cat.regex.test(title)) {
+      return cat.category;
+    }
+  }
+
   return null;
 }

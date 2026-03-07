@@ -28,7 +28,7 @@ import ButtonGroup from "./ui/button-group/ButtonGroup.vue";
 import { getProfileUrl } from "@/utilities/profile/location";
 import { getCategoryForProduct } from "@/utilities/category";
 import { getTagsForProduct } from "@/utilities/tag";
-import { exportProduct, getAllProducts } from "@/utilities/odoo";
+import * as odoo from "@/utilities/odoo";
 import Spinner from "./ui/spinner/Spinner.vue";
 
 const settings = useSettingsStore();
@@ -107,10 +107,40 @@ const odooProducts = ref<Map<string, boolean>>(new Map());
 
 const isLoading = ref(false);
 
-onMounted(async () => {
-  isLoading.value = true;
+const loadingProducts = ref<Set<string>>(new Set());
 
-  getAllProducts()
+async function exportProduct(product: CombinedProduct) {
+  if (loadingProducts.value.has(product.identifier)) {
+    return; // Prevent multiple clicks
+  }
+
+  loadingProducts.value.add(product.identifier);
+
+  await odoo
+    .exportProduct(product)
+    .then(() => {
+      // Refresh Odoo products after export
+      return odoo.getAllProducts();
+    })
+    .then((products) => {
+      const productMap = new Map<string, boolean>();
+      products.forEach((product) => {
+        productMap.set(product.identifier, product.active);
+      });
+      odooProducts.value = productMap;
+    })
+    .catch((error) => {
+      console.error("Error exporting product:", error);
+    })
+    .finally(() => {
+      loadingProducts.value.delete(product.identifier);
+    });
+}
+
+async function updateOdooProducts() {
+  isLoading.value = true;
+  await odoo
+    .getAllProducts()
     .then(
       (products) => {
         const productMap = new Map<string, boolean>();
@@ -126,6 +156,10 @@ onMounted(async () => {
     .finally(() => {
       isLoading.value = false;
     });
+}
+
+onMounted(async () => {
+  await updateOdooProducts();
 });
 
 function productExistsInOdoo(product: CombinedProduct): boolean {
@@ -292,6 +326,10 @@ const ProductStateColors: Record<ProductState, string> = {
                   :disabled="!product.detail"
                   @click="exportProduct(product)"
                 >
+                  <Spinner
+                    v-if="loadingProducts.has(product.identifier)"
+                    class="w-4 h-4"
+                  />
                   <span v-if="productExistsInOdoo(product)">Mettre à jour</span>
                   <span v-else>Odoo</span>
                 </Button>

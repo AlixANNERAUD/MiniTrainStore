@@ -13,10 +13,9 @@ export const COMPILED_TAGS = computed(() => {
 export function getTagsForProduct(product: CombinedProduct): string[] {
   const tags: string[] = [];
   const title = product.listing.title;
-  const description = product.detail?.description || "";
 
   COMPILED_TAGS.value.forEach((tag) => {
-    if (tag.regex.test(title) || tag.regex.test(description)) {
+    if (tag.regex.test(title)) {
       tags.push(tag.tag);
     }
   });

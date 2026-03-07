@@ -1,6 +1,5 @@
 import { ProductListing, ProductState } from "../settings";
 import { getProductIdentifierFromUrl } from "../product/location";
-import * as chrono from "chrono-node";
 
 export function parseProfileName(): string | null {
   // Try multiple selectors for the profile name
@@ -18,6 +17,52 @@ export function parseProfileName(): string | null {
   }
 
   return null;
+}
+
+function getLastWeekdayDate(weekday: number): string {
+  const today = new Date();
+  const lastWeekday = new Date(today);
+  lastWeekday.setDate(
+    today.getDate() - ((today.getDay() + 7 - weekday) % 7 || 7),
+  );
+  return lastWeekday.toISOString();
+}
+
+function parseDate(dateStr: string): string {
+  if (dateStr.toLocaleLowerCase().includes("aujourd’hui")) {
+    return new Date().toISOString();
+  } else if (dateStr.toLocaleLowerCase().includes("hier")) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return yesterday.toISOString();
+  } else if (dateStr.toLocaleLowerCase().includes("samedi dernier")) {
+    return getLastWeekdayDate(6); // 6 represents Saturday
+  } else if (dateStr.toLocaleLowerCase().includes("vendredi dernier")) {
+    return getLastWeekdayDate(5); // 5 represents Friday
+  } else if (dateStr.toLocaleLowerCase().includes("jeudi dernier")) {
+    return getLastWeekdayDate(4); // 4 represents Thursday
+  } else if (dateStr.toLocaleLowerCase().includes("mercredi dernier")) {
+    return getLastWeekdayDate(3); // 3 represents Wednesday
+  } else if (dateStr.toLocaleLowerCase().includes("mardi dernier")) {
+    return getLastWeekdayDate(2); // 2 represents Tuesday
+  } else if (dateStr.toLocaleLowerCase().includes("lundi dernier")) {
+    return getLastWeekdayDate(1); // 1 represents Monday
+  } else if (dateStr.toLocaleLowerCase().includes("dimanche dernier")) {
+    return getLastWeekdayDate(0); // 0 represents Sunday
+  } else {
+    // Should be in 02/01/2023 format, try parsing it
+    const parts = dateStr.split("/").map((part) => parseInt(part, 10));
+    if (parts.length === 3) {
+      const [day, month, year] = parts;
+      const date = new Date(year, month - 1, day);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString();
+      }
+    }
+  }
+
+  // If all parsing fails, return current date as fallback
+  return new Date().toISOString();
 }
 
 export function parseProduct(article: Element): {
@@ -75,33 +120,14 @@ export function parseProduct(article: Element): {
       console.error("Error parsing date:", e);
     }
 
+    console.log(
+      `Parsed product - ID: ${identifier}, Title: ${title}, Price: ${price}, Date: ${datePosted}, State: ${state}`,
+    );
+
     // Parse the date string using chrono-node
-    let date = new Date().toISOString();
+    const date = parseDate(datePosted);
 
-    try {
-      // Handle relative dates like "aujourd’hui", "hier", "jeudi dernier"
-      const chronoOptions = {
-        forwardDate: true,
-      };
-      const parsedDate = chrono.fr.parseDate(
-        datePosted,
-        new Date(),
-        chronoOptions,
-      );
-
-      if (parsedDate) {
-        date = parsedDate.toISOString();
-      } else {
-        console.warn(
-          "Could not parse date string with chrono-node, using current date:",
-          datePosted,
-        );
-        date = new Date().toISOString();
-      }
-    } catch (e) {
-      console.error("Error parsing date string with chrono-node:", e);
-      date = new Date().toISOString();
-    }
+    console.log(`Parsed ${datePosted} into ISO date: ${date}`);
 
     return {
       identifier,
@@ -119,12 +145,6 @@ export function parseProduct(article: Element): {
     console.error("Error parsing article:", e);
     return null;
   }
-}
-
-function fixPhotoUrl(url: string | null): string {
-  if (!url) return "";
-  // Convert thumbnail URLs to full-size
-  return url.replace(/ad-thumb/g, "ad-large").replace(/ad-small/g, "ad-large");
 }
 
 export function parseProfilePage(): {

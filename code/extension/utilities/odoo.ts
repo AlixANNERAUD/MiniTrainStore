@@ -55,7 +55,7 @@ export interface ProductTemplateRequest {
   image_1920?: string; // base64-encoded image
   categ_id?: number; // category ID
   public_categ_ids?: [number, number, number[]][];
-  product_template_image_ids?: [number, number, number[]][];
+  product_template_image_ids?: [number, number, unknown][];
 }
 
 async function requestOdoo(
@@ -90,7 +90,9 @@ async function requestOdoo(
 }
 
 function stringToHtml(str: string): string {
-  str = str.replace("\n", "<br/>");
+  console.log("Original description:", str);
+  str = str.replace("\\n", "<br/>").replace(/\n/g, "<br/>");
+  console.log("Formatted description:", str);
   return str;
 }
 
@@ -111,7 +113,7 @@ export async function getAllProducts(): Promise<
 
   const response = await requestOdoo("product.template", "search_read", {
     fields: ["display_name", "default_code", "active"],
-    domain: ["default_code", "ilike", "a%"], // Example: fetch all products with default_code starting with 'a'
+    domain: [["display_name", "ilike", "a%"]], // Example: fetch all products with default_code starting with 'a'
   });
 
   const records = ResponseSchema.parse(response);
@@ -280,31 +282,45 @@ async function downloadImageAsBase64(url: string): Promise<string> {
   });
 }
 
-// Load images (simplified - we'll just use the first image for now)
+function getLargePhotoUrl(url: string | null): string {
+  if (!url) return "";
+  // Convert thumbnail URLs to full-size
+  return url.replace(/ad-thumb/g, "ad-large").replace(/ad-small/g, "ad-large");
+}
+
+// Load images — downloads all photos for a product
 async function loadImages(
   product: CombinedProduct,
-): Promise<{ firstImage: string | null; imageIds: number[] }> {
-  const imageIds: number[] = [];
+): Promise<{ firstImage: string | null; additionalImages: string[] }> {
   let firstImage: string | null = null;
+  const additionalImages: string[] = [];
 
   if (!product.detail?.photos || product.detail.photos.length === 0) {
-    return { firstImage, imageIds };
+    return { firstImage, additionalImages };
   }
 
-  // Download first image as base64 for main product image
+  // Download first image as base64 for the main product image (image_1920)
   try {
-    firstImage = await downloadImageAsBase64(product.detail.photos[0]);
+    firstImage = await downloadImageAsBase64(
+      getLargePhotoUrl(product.detail.photos[0]),
+    );
   } catch (error) {
     console.error("Error downloading first image:", error);
   }
 
-  // Note: For now, we're skipping the complex image resizing and upload logic
-  // In a full implementation, you'd want to:
-  // 1. Resize images to multiple sizes (128, 256, 512, 1024)
-  // 2. Upload additional images via product.image/create
-  // 3. Return their IDs
+  // Download remaining images for product.image gallery records
+  for (let i = 1; i < product.detail.photos.length; i++) {
+    try {
+      const imageData = await downloadImageAsBase64(
+        getLargePhotoUrl(product.detail.photos[i]),
+      );
+      additionalImages.push(imageData);
+    } catch (error) {
+      console.error(`Error downloading image ${i}:`, error);
+    }
+  }
 
-  return { firstImage, imageIds };
+  return { firstImage, additionalImages };
 }
 
 // Convert product to Odoo data format
@@ -317,10 +333,10 @@ async function productToOdooDict(
   const taxId = await getTaxId();
 
   const description = product.detail?.description || "";
-  let descriptionHtml = stringToHtml(description);
-  descriptionHtml = `${descriptionHtml}<br/>Disponible également sur <a href='${product.listing.url}'>leboncoin.fr</a>`;
+  const descriptionWithLink = `${description}\n\nDisponible également sur <a href="${product.listing.url}" target="_blank">leboncoin</a>.`;
+  const descriptionHtml = stringToHtml(descriptionWithLink);
 
-  const { firstImage, imageIds } = await loadImages(product);
+  const { firstImage, additionalImages } = await loadImages(product);
 
   const createdDate = new Date(product.listing.date)
     .toISOString()
@@ -346,8 +362,19 @@ async function productToOdooDict(
     productData.image_1920 = firstImage;
   }
 
-  if (imageIds.length > 0) {
-    productData.product_template_image_ids = [[6, 0, imageIds]];
+  if (additionalImages.length > 0) {
+    // Command 5 clears all existing gallery images, then command 0 creates new ones
+    productData.product_template_image_ids = [
+      [5, 0, 0],
+      ...additionalImages.map(
+        (img, i) =>
+          [
+            0,
+            0,
+            { name: `Image ${i + 2}`, sequence: i + 2, image_1920: img },
+          ] as [number, number, unknown],
+      ),
+    ];
   }
 
   if (category) {
@@ -412,6 +439,17 @@ export async function exportProduct(
     );
 
     if (existingProductId === null) {
+      if (
+        product.listing.state === ProductState.PURCHASE_COMPLETED ||
+        product.listing.state === ProductState.REMOVED
+      ) {
+        // Don't create new product if it's already sold or removed
+        return {
+          success: true,
+          created: false,
+        };
+      }
+
       // Create new product
       const productId = await createProduct(product);
       return {

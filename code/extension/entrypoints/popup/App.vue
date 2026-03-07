@@ -6,7 +6,6 @@ import CardDescription from "@/components/ui/card/CardDescription.vue";
 import CardContent from "@/components/ui/card/CardContent.vue";
 
 import Separator from "@/components/ui/separator/Separator.vue";
-import { TrainFront } from "lucide-vue-next";
 import Tabs from "@/components/ui/tabs/Tabs.vue";
 import TabsList from "@/components/ui/tabs/TabsList.vue";
 import TabsTrigger from "@/components/ui/tabs/TabsTrigger.vue";
@@ -23,7 +22,6 @@ const tabs = ["Produits", "Réglages"];
 <template>
   <Card class="w-200">
     <CardHeader>
-      <TrainFront class="w-6 h-6 mr-2" />
       <CardTitle>Mini Train Store</CardTitle>
       <CardDescription>Gestion des profils et des annonces</CardDescription>
     </CardHeader>
