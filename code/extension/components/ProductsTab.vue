@@ -26,6 +26,8 @@ import Button from "@/components/ui/button/Button.vue";
 import { ArrowDownAZ, Eye, Filter, User } from "lucide-vue-next";
 import ButtonGroup from "./ui/button-group/ButtonGroup.vue";
 import { getProfileUrl } from "@/utilities/profile/location";
+import { getCategoryForProduct } from "@/utilities/category";
+import { getTagsForProduct } from "@/utilities/tag";
 
 const settings = useSettingsStore();
 
@@ -195,6 +197,22 @@ const ProductStateColors: Record<ProductState, string> = {
               <ItemDescription>{{
                 product.detail?.description
               }}</ItemDescription>
+              <ItemDescription class="text-sm text-muted-foreground">
+                Catégorie :
+                <Badge variant="outline">
+                  {{ getCategoryForProduct(product) }}
+                </Badge>
+              </ItemDescription>
+              <ItemDescription class="text-sm text-muted-foreground">
+                Étiquettes :
+                <Badge
+                  v-for="tag in getTagsForProduct(product)"
+                  :key="tag"
+                  variant="outline"
+                >
+                  {{ tag }}
+                </Badge>
+              </ItemDescription>
             </ItemContent>
             <ItemActions>
               <div class="flex flex-col items-end gap-1">

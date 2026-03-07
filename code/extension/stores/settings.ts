@@ -15,6 +15,16 @@ export const SETTINGS_KEY = "miniTrainStoreSettings";
 export const useSettingsStore = defineWxtStore(SETTINGS_KEY, {
   state: () => DEFAULT_SETTINGS,
   actions: (state) => ({
+    reset() {
+      state.categories = DEFAULT_SETTINGS.categories;
+      state.tags = DEFAULT_SETTINGS.tags;
+      state.odoo = DEFAULT_SETTINGS.odoo;
+      state.profiles = DEFAULT_SETTINGS.profiles;
+      state.selectedProfile = DEFAULT_SETTINGS.selectedProfile;
+      state.selectedFilter = DEFAULT_SETTINGS.selectedFilter;
+      state.selectedOrderBy = DEFAULT_SETTINGS.selectedOrderBy;
+      state.currentTab = DEFAULT_SETTINGS.currentTab;
+    },
     addProfile(userIdentifier: string, displayName: string) {
       state.profiles[userIdentifier] = {
         displayName,

@@ -63,21 +63,68 @@ export interface OdooSettings {
   apiKey: string;
 }
 
+export interface TagSettings {
+  pattern: string;
+  tag: string;
+}
+
+export interface CategorySettings {
+  pattern: string;
+  category: string;
+}
+
 export interface SettingsData {
   odoo: OdooSettings;
   profiles: Record<string, ProfileData>;
+  tags: TagSettings[];
+  categories: CategorySettings[];
   selectedProfile: string | null;
   selectedFilter: ProductState | "ALL";
   selectedOrderBy: OrderBy;
   currentTab: 0;
 }
 
+// Updated DEFAULT_SETTINGS to include regex-based tags
 export const DEFAULT_SETTINGS: SettingsData = {
   odoo: {
     url: "",
     apiKey: "",
   },
   profiles: {},
+  tags: [
+    { pattern: "\\bjouef\\b", tag: "Jouef" },
+    { pattern: "\\blima\\b", tag: "Lima" },
+    { pattern: "\\bhornby\\b", tag: "Hornby" },
+    { pattern: "\\broco\\b", tag: "Roco" },
+    { pattern: "\\bpiko\\b", tag: "Piko" },
+    { pattern: "\\bmarklin\\b|\\bmärklin\\b", tag: "Märklin" },
+    { pattern: "\\bfleischmann\\b", tag: "Fleischmann" },
+    { pattern: "\\bho\\b", tag: "H0" },
+    { pattern: "\\bsncf\\b", tag: "SNCF" },
+  ],
+  categories: [
+    {
+      pattern:
+        "\\bwgon\\b|\\bwagon\\b|\\bwagons\\b|\\bvoiture\\b|\\bvoitures\\b|\\bfourgon\\b|\\ballège\\b|\\bremorque\\b",
+      category: "Wagons",
+    },
+    {
+      pattern:
+        "\\blocomotive\\b|\\blocomotives\\b|\\blocotracteur\\b|\\blocotender\\b|\\bautorail\\b|motrice\\b",
+      category: "Locomotives",
+    },
+    {
+      pattern:
+        "\\btrails\\b|\\brail\\b|\\baiguillage\\b|\\bvoie\\b|\\brails\\b|\\baiguillages\\b|\\bvoies\\b|\\bcroisement\\b|\\bjonction\\b|\\btjd\\b|\\bheurtoir\\b|\\bheurtoirs\\b",
+      category: "Rails",
+    },
+    {
+      pattern:
+        "\\bpersonnages\\b|\\bpersonnage\\b|\\btunnel\\b|\\bconteneurs\\b|\\bbureau\\b",
+      category: "Décor",
+    },
+    { pattern: "\\bcoffret\\b|\\bcoffrets\\b", category: "Coffrets" },
+  ],
   selectedProfile: null,
   selectedFilter: "ALL",
   selectedOrderBy: OrderBy.DATE,

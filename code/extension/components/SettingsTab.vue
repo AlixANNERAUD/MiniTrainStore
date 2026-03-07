@@ -7,8 +7,19 @@ import ItemTitle from "./ui/item/ItemTitle.vue";
 import ItemActions from "./ui/item/ItemActions.vue";
 import Input from "./ui/input/Input.vue";
 import ItemDescription from "./ui/item/ItemDescription.vue";
+import Button from "./ui/button/Button.vue";
 
 const settings = useSettingsStore();
+
+function resetSettings() {
+  if (
+    confirm(
+      "Êtes-vous sûr de vouloir réinitialiser les paramètres ? Cette action est irréversible.",
+    )
+  ) {
+    settings.reset();
+  }
+}
 </script>
 
 <template>
@@ -42,6 +53,21 @@ const settings = useSettingsStore();
           v-model="settings.odoo.value.apiKey"
           placeholder="Clé API pour accéder à l'instance Odoo"
         />
+      </ItemActions>
+    </Item>
+    <Item>
+      <ItemContent>
+        <ItemTitle>Réinitialiser les paramètres</ItemTitle>
+        <ItemDescription>
+          Cette action réinitialisera tous les paramètres à leurs valeurs par
+          défaut. Utilisez cette option si vous souhaitez recommencer la
+          configuration depuis le début.
+        </ItemDescription>
+      </ItemContent>
+      <ItemActions>
+        <Button variant="destructive" @click="resetSettings()">
+          Réinitialiser
+        </Button>
       </ItemActions>
     </Item>
   </ItemGroup>
