@@ -28,20 +28,11 @@ export interface ProductDetail {
   scrapedAt: string; // ISO date string - when details were fetched
 }
 
-// Odoo export metadata
-export interface OdooExportStatus {
-  exported: boolean;
-  odooProductId?: number;
-  lastExportedAt?: string; // ISO date string
-  exportError?: string;
-}
-
 // Combined view for convenience
 export interface CombinedProduct {
   identifier: string;
   listing: ProductListing;
   detail?: ProductDetail;
-  odooExport?: OdooExportStatus;
 }
 
 export interface ProductUpdateStatistics {
@@ -54,7 +45,6 @@ export interface ProfileData {
   displayName?: string; // Display name from profile page
   listings: Record<string, ProductListing>; // keyed by product ID
   details: Record<string, ProductDetail>; // keyed by product ID
-  odooExports: Record<string, OdooExportStatus>; // keyed by product ID
   lastScraped: string; // ISO date string
 }
 

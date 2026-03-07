@@ -18,7 +18,7 @@ import {
   OrderByLabels,
   ProductStateLabels,
 } from "@/utilities/filtering";
-import { ProductState } from "@/utilities/settings";
+import { CombinedProduct, ProductState } from "@/utilities/settings";
 import Item from "@/components/ui/item/Item.vue";
 import Separator from "@/components/ui/separator/Separator.vue";
 import Badge from "@/components/ui/badge/Badge.vue";
@@ -28,6 +28,8 @@ import ButtonGroup from "./ui/button-group/ButtonGroup.vue";
 import { getProfileUrl } from "@/utilities/profile/location";
 import { getCategoryForProduct } from "@/utilities/category";
 import { getTagsForProduct } from "@/utilities/tag";
+import { exportProduct, getAllProducts } from "@/utilities/odoo";
+import Spinner from "./ui/spinner/Spinner.vue";
 
 const settings = useSettingsStore();
 
@@ -101,6 +103,39 @@ function openProfileUrl() {
   openUrl(getProfileUrl(settings.selectedProfile.value || ""));
 }
 
+const odooProducts = ref<Map<string, boolean>>(new Map());
+
+const isLoading = ref(false);
+
+onMounted(async () => {
+  isLoading.value = true;
+
+  getAllProducts()
+    .then(
+      (products) => {
+        const productMap = new Map<string, boolean>();
+        products.forEach((product) => {
+          productMap.set(product.identifier, product.active);
+        });
+        odooProducts.value = productMap;
+      },
+      (error) => {
+        console.error("Error fetching Odoo products:", error);
+      },
+    )
+    .finally(() => {
+      isLoading.value = false;
+    });
+});
+
+function productExistsInOdoo(product: CombinedProduct): boolean {
+  return odooProducts.value.has(product.identifier);
+}
+
+function productIsActiveInOdoo(product: CombinedProduct): boolean {
+  return odooProducts.value.get(product.identifier) || false;
+}
+
 const ProductStateColors: Record<ProductState, string> = {
   [ProductState.ACTIVE]: "bg-green-100 text-green-800",
   [ProductState.PURCHASE_PENDING]: "bg-yellow-100 text-yellow-800",
@@ -170,6 +205,8 @@ const ProductStateColors: Record<ProductState, string> = {
           </SelectItem>
         </SelectContent>
       </Select>
+
+      <Spinner v-if="isLoading" />
     </div>
 
     <Separator />
@@ -247,13 +284,15 @@ const ProductStateColors: Record<ProductState, string> = {
                   :class="[
                     'w-full',
                     'justify-center',
-                    product.odooExport
+                    productExistsInOdoo(product) &&
+                    productIsActiveInOdoo(product)
                       ? 'bg-green-100 text-green-800'
                       : 'bg-red-100 text-red-800',
                   ]"
                   :disabled="!product.detail"
+                  @click="exportProduct(product)"
                 >
-                  <span v-if="product.odooExport">Mettre à jour</span>
+                  <span v-if="productExistsInOdoo(product)">Mettre à jour</span>
                   <span v-else>Odoo</span>
                 </Button>
               </div>

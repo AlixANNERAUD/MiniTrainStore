@@ -30,7 +30,6 @@ export const useSettingsStore = defineWxtStore(SETTINGS_KEY, {
         displayName,
         listings: {},
         details: {},
-        odooExports: {},
         lastScraped: new Date().toISOString(),
       };
     },
@@ -44,9 +43,6 @@ export const useSettingsStore = defineWxtStore(SETTINGS_KEY, {
             identifier: productIdentifier,
             listing: profile.listings[productIdentifier],
             detail: profile.details[productIdentifier],
-            odooExport: profile.odooExports
-              ? profile.odooExports[productIdentifier]
-              : undefined,
           };
         }
       }
@@ -123,7 +119,6 @@ export const useSettingsStore = defineWxtStore(SETTINGS_KEY, {
           identifier: id,
           listing: profile.listings[id],
           detail: profile.details[id],
-          odooExport: profile.odooExports ? profile.odooExports[id] : undefined,
         }),
       );
 
@@ -133,7 +128,6 @@ export const useSettingsStore = defineWxtStore(SETTINGS_KEY, {
       if (state.profiles[userIdentifier]) {
         state.profiles[userIdentifier].listings = {};
         state.profiles[userIdentifier].details = {};
-        state.profiles[userIdentifier].odooExports = {};
         state.profiles[userIdentifier].lastScraped = new Date().toISOString();
       }
     },
