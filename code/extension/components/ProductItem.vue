@@ -71,6 +71,10 @@ async function exportProduct(product: CombinedProduct) {
           {{ product.listing.title }}
         </ItemTitle>
         <ItemDescription>{{ product.detail?.description }}</ItemDescription>
+        <ItemDescription v-if="product.detail">
+          Photos :
+          {{ product.detail.photos.length }}
+        </ItemDescription>
         <ItemDescription class="text-sm text-muted-foreground">
           Catégorie :
           <Badge variant="outline">
