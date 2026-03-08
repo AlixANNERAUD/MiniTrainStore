@@ -24,7 +24,7 @@ const tabs = ["Produits", "Réglages"];
   <Card class="w-160 h-auto border-0">
     <CardHeader>
       <div class="flex items-center gap-2">
-        <TrainFrontTunnel />
+        <img src="/icon.svg" alt="Icon" class="h-6" />
         <CardTitle>Mini Train Store</CardTitle> -
         <CardDescription>Gestion des profils et des annonces</CardDescription>
       </div>
