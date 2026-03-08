@@ -40,8 +40,8 @@ const moveTagDown = (index: number) => {
   <FieldSet>
     <FieldLegend>Étiquettes personnalisées</FieldLegend>
     <FieldDescription>
-      Créez des étiquettes personnalisées pour organiser vos produits selon des motifs
-      spécifiques (expressions régulières).
+      Créez des étiquettes personnalisées pour organiser vos produits selon des
+      motifs spécifiques (expressions régulières).
     </FieldDescription>
     <FieldSeparator />
     <!-- Existing Tags -->

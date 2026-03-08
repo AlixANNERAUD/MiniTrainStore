@@ -74,6 +74,12 @@ const odooProducts = ref<Map<string, boolean>>(new Map());
 const isLoading = ref(false);
 
 async function updateOdooProducts() {
+  // Check if Odoo is configured before attempting to fetch
+  if (!settings.odoo.value.url || !settings.odoo.value.apiKey) {
+    console.warn("Odoo not configured, skipping product fetch");
+    return;
+  }
+
   isLoading.value = true;
   await odoo
     .getAllProducts()
@@ -95,6 +101,9 @@ async function updateOdooProducts() {
 }
 
 onMounted(async () => {
+  // Wait for settings to load from storage before attempting to fetch
+  await new Promise((resolve) => setTimeout(resolve, 100));
+
   updateOdooProducts().catch((error) => {
     console.error("Error during initial Odoo products fetch:", error);
   });
