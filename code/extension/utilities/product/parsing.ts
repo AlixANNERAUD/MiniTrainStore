@@ -20,8 +20,10 @@ export async function getPhotoUrls(): Promise<string[]> {
   // Look for gallery button and try to click it to get all photos
   const galleryButtons = Array.from(document.querySelectorAll("button"));
   const galleryButton = galleryButtons.find((btn) =>
-    /Voir les( \d+)? photos?/i.test(btn.textContent || ""),
+    /Voir les.*photos?/i.test(btn.textContent || ""),
   );
+
+  console.log(`Gallery button ${galleryButton ? "found" : "not found"}`);
 
   if (galleryButton) {
     try {
