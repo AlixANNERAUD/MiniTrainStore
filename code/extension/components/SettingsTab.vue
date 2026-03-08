@@ -1,16 +1,20 @@
 <script setup lang="ts">
 import { useSettingsStore } from "@/stores/settings";
-import Item from "./ui/item/Item.vue";
-import ItemContent from "./ui/item/ItemContent.vue";
-import ItemGroup from "./ui/item/ItemGroup.vue";
-import ItemTitle from "./ui/item/ItemTitle.vue";
-import ItemActions from "./ui/item/ItemActions.vue";
-import Input from "./ui/input/Input.vue";
-import ItemDescription from "./ui/item/ItemDescription.vue";
-import Button from "./ui/button/Button.vue";
-import ScrollArea from "./ui/scroll-area/ScrollArea.vue";
-import ButtonGroup from "./ui/button-group/ButtonGroup.vue";
+import {
+  Field,
+  FieldGroup,
+  FieldSet,
+  FieldLegend,
+  FieldLabel,
+  FieldDescription,
+  FieldSeparator,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { downloadStringAsFile } from "@/utilities/browser";
+import ScrollArea from "./ui/scroll-area/ScrollArea.vue";
+import TagsEditor from "./TagsEditor.vue";
+import CategoriesEditor from "./CategoriesEditor.vue";
 
 const settings = useSettingsStore();
 
@@ -58,58 +62,62 @@ function importSettings() {
 </script>
 
 <template>
-  <ScrollArea class="w-full h-80">
-    <ItemGroup>
-      <Item>
-        <ItemContent>
-          <ItemTitle>URL de l'instance Odoo</ItemTitle>
-          <ItemDescription>
-            L'URL de votre instance Odoo, par exemple :
-            https://mon-instance-odoo.com
-          </ItemDescription>
-        </ItemContent>
-        <ItemActions>
+  <ScrollArea class="h-100 w-full">
+    <FieldGroup>
+      <FieldSet>
+        <FieldLegend>Configuration Odoo</FieldLegend>
+        <FieldDescription>
+          Configurez l'URL et la clé API pour vous connecter à votre instance
+          Odoo.
+        </FieldDescription>
+        <Field>
+          <FieldLabel for="odoo-url">URL de l'instance Odoo</FieldLabel>
           <Input
+            id="odoo-url"
             v-model="settings.odoo.value.url"
+            class="w-80"
             placeholder="https://mon-instance-odoo.com"
           />
-        </ItemActions>
-      </Item>
-      <Item>
-        <ItemContent>
-          <ItemTitle>Clé API Odoo</ItemTitle>
-          <ItemDescription>
-            La clé API pour accéder à votre instance Odoo. Assurez-vous que
-            cette clé a les permissions nécessaires pour lire et écrire les
-            données des produits.
-          </ItemDescription>
-        </ItemContent>
-        <ItemActions>
+          <FieldDescription>
+            Entrez l'URL complète de votre instance Odoo.
+          </FieldDescription>
+        </Field>
+        <Field>
+          <FieldLabel for="odoo-api-key">Clé API Odoo</FieldLabel>
           <Input
+            id="odoo-api-key"
             v-model="settings.odoo.value.apiKey"
             type="password"
+            class="w-80"
             placeholder="Clé API pour accéder à l'instance Odoo"
           />
-        </ItemActions>
-      </Item>
-      <Item>
-        <ItemContent>
-          <ItemTitle> Gestion des données de l'extension </ItemTitle>
-        </ItemContent>
-        <ItemActions>
-          <ButtonGroup>
-            <Button variant="outline" @click="exportSettings()">
-              Exporter
-            </Button>
-            <Button variant="outline" @click="importSettings()">
-              Importer
-            </Button>
-            <Button variant="destructive" @click="resetSettings()">
-              Réinitialiser
-            </Button>
-          </ButtonGroup>
-        </ItemActions>
-      </Item>
-    </ItemGroup>
+          <FieldDescription>
+            Fournissez la clé API pour authentifier les requêtes.
+          </FieldDescription>
+        </Field>
+      </FieldSet>
+      <FieldSeparator />
+      <CategoriesEditor />
+      <FieldSeparator />
+      <TagsEditor />
+      <FieldSeparator />
+      <FieldSet>
+        <FieldLegend>Gestion des données de l'extension</FieldLegend>
+        <FieldDescription>
+          Exportez, importez ou réinitialisez les paramètres de l'extension.
+        </FieldDescription>
+        <Field orientation="horizontal">
+          <Button variant="outline" @click="exportSettings()">
+            Exporter
+          </Button>
+          <Button variant="outline" @click="importSettings()">
+            Importer
+          </Button>
+          <Button variant="destructive" @click="resetSettings()">
+            Réinitialiser
+          </Button>
+        </Field>
+      </FieldSet>
+    </FieldGroup>
   </ScrollArea>
 </template>

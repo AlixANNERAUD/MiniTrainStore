@@ -144,5 +144,45 @@ export const useSettingsStore = defineWxtStore(SETTINGS_KEY, {
     export(): SettingsData {
       return JSON.parse(JSON.stringify(state));
     },
+    addTag(tag: string, pattern: string) {
+      state.tags.push({ tag, pattern });
+    },
+    deleteTag(index: number) {
+      state.tags.splice(index, 1);
+    },
+    moveTagUp(index: number) {
+      if (index > 0) {
+        const temp = state.tags[index];
+        state.tags[index] = state.tags[index - 1];
+        state.tags[index - 1] = temp;
+      }
+    },
+    moveTagDown(index: number) {
+      if (index < state.tags.length - 1) {
+        const temp = state.tags[index];
+        state.tags[index] = state.tags[index + 1];
+        state.tags[index + 1] = temp;
+      }
+    },
+    addCategory(category: string, pattern: string) {
+      state.categories.push({ category, pattern });
+    },
+    deleteCategory(index: number) {
+      state.categories.splice(index, 1);
+    },
+    moveCategoryUp(index: number) {
+      if (index > 0) {
+        const temp = state.categories[index];
+        state.categories[index] = state.categories[index - 1];
+        state.categories[index - 1] = temp;
+      }
+    },
+    moveCategoryDown(index: number) {
+      if (index < state.categories.length - 1) {
+        const temp = state.categories[index];
+        state.categories[index] = state.categories[index + 1];
+        state.categories[index + 1] = temp;
+      }
+    },
   }),
 });
