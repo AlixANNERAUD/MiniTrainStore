@@ -8,9 +8,8 @@ import { scrapeProfileAllPages } from "@/utilities/profile/navigation";
 
 const settings = useSettingsStore();
 
-const currentUserIdentifier = getProfileIdentifierFromUrl(
-  new URL(window.location.href),
-);
+const currentUserIdentifier =
+  getProfileIdentifierFromUrl(new URL(window.location.href)) || "";
 
 const isProfileRegistered = settings.isProfileAdded(
   currentUserIdentifier || "",
@@ -38,7 +37,7 @@ function scrapeAllPages() {
 
   isLoading.value = true;
 
-  scrapeProfileAllPages().finally(() => {
+  scrapeProfileAllPages(currentUserIdentifier).finally(() => {
     isLoading.value = false;
   });
 }

@@ -1,8 +1,3 @@
-export enum OrderBy {
-  DATE = "date",
-  PRICE = "price",
-}
-
 export enum ProductState {
   ACTIVE = "ACTIVE",
   PURCHASE_PENDING = "PURCHASE_PENDING",
@@ -68,11 +63,6 @@ export interface SettingsData {
   profiles: Record<string, ProfileData>;
   tags: TagSettings[];
   categories: CategorySettings[];
-  selectedProfile: string | null;
-  selectedFilter: ProductState | "ALL";
-  selectedOrderBy: OrderBy;
-  searchQuery: string;
-  currentTab: 0;
 }
 
 // Updated DEFAULT_SETTINGS to include regex-based tags
@@ -116,9 +106,4 @@ export const DEFAULT_SETTINGS: SettingsData = {
     },
     { pattern: "\\bcoffret\\b|\\bcoffrets\\b", category: "Coffrets" },
   ],
-  selectedProfile: null,
-  selectedFilter: "ALL",
-  selectedOrderBy: OrderBy.DATE,
-  searchQuery: "",
-  currentTab: 0,
 };

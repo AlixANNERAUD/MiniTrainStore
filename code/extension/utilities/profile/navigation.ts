@@ -53,7 +53,7 @@ export async function scrapeProfileCurrentPage(
   }
 }
 
-export async function scrapeProfileAllPages() {
+export async function scrapeProfileAllPages(userIdentifier: string) {
   const settings = useSettingsStore();
 
   const allProducts: Record<string, ProductListing> = {};
@@ -88,9 +88,5 @@ export async function scrapeProfileAllPages() {
     );
   }
 
-  settings.updateProductListing(
-    settings.selectedProfile.value!,
-    allProducts,
-    true,
-  );
+  settings.updateProductListing(userIdentifier, allProducts, true);
 }

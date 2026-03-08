@@ -12,10 +12,10 @@ import TabsTrigger from "@/components/ui/tabs/TabsTrigger.vue";
 import TabsContent from "@/components/ui/tabs/TabsContent.vue";
 import ProductsTab from "@/components/ProductsTab.vue";
 import SettingsTab from "@/components/SettingsTab.vue";
-import { useSettingsStore } from "@/stores/settings";
 import { TrainFrontTunnel } from "lucide-vue-next";
+import { storageRef } from "@/utilities/browser";
 
-const settings = useSettingsStore();
+const currentTab = storageRef("currentTab", 0);
 
 const tabs = ["Produits", "Réglages"];
 </script>
@@ -30,11 +30,7 @@ const tabs = ["Produits", "Réglages"];
       </div>
     </CardHeader>
     <CardContent>
-      <Tabs
-        v-model="settings.currentTab.value"
-        :default-value="0"
-        class="w-full h-full"
-      >
+      <Tabs v-model="currentTab" :default-value="0" class="w-full h-full">
         <TabsList class="w-full">
           <TabsTrigger
             v-for="[index, tab] in tabs.entries()"

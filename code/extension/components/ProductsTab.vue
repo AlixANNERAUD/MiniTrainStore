@@ -10,6 +10,7 @@ import { useSettingsStore } from "@/stores/settings";
 import {
   filterAndSortProducts,
   getProductStatistics,
+  OrderBy,
   OrderByLabels,
   ProductStateLabels,
 } from "@/utilities/filtering";
@@ -26,9 +27,17 @@ import { getProfileUrl } from "@/utilities/profile/location";
 import * as odoo from "@/utilities/odoo";
 import Spinner from "./ui/spinner/Spinner.vue";
 import ProductItem from "./ProductItem.vue";
-import { openUrl } from "@/utilities/browser";
+import { openUrl, storageRef } from "@/utilities/browser";
 
 const settings = useSettingsStore();
+
+const selectedProfile = storageRef<string>("selectedProfile", "");
+const selectedOrderBy = storageRef("selectedOrderBy", OrderBy.DATE);
+const selectedFilter = storageRef<ProductState | "ALL">(
+  "selectedFilter",
+  "ALL",
+);
+const searchQuery = storageRef("searchQuery", "");
 
 const profilesList = computed(() => {
   return Object.entries(settings.profiles.value).map(
@@ -40,24 +49,21 @@ const profilesList = computed(() => {
 });
 
 const combinedProducts = computed(() =>
-  settings.getCombinedProducts(settings.selectedProfile.value || ""),
+  settings.getCombinedProducts(selectedProfile.value || ""),
 );
 
 const sortedAndFilteredProducts = computed(() => {
-  if (!settings.selectedProfile.value) {
+  if (!selectedProfile.value) {
     return [];
   }
 
   const filteredProducts = filterAndSortProducts(
     combinedProducts.value,
     {
-      state:
-        settings.selectedFilter.value !== "ALL"
-          ? settings.selectedFilter.value
-          : undefined,
-      query: settings.searchQuery.value.trim() || undefined,
+      state: selectedFilter.value !== "ALL" ? selectedFilter.value : undefined,
+      query: searchQuery.value.trim() || undefined,
     },
-    settings.selectedOrderBy.value,
+    selectedOrderBy.value,
   );
 
   return filteredProducts;
@@ -68,7 +74,7 @@ const productStatistics = computed(() =>
 );
 
 function openProfileUrl() {
-  openUrl(getProfileUrl(settings.selectedProfile.value || ""));
+  openUrl(getProfileUrl(selectedProfile.value || ""));
 }
 
 const odooProducts = ref<
@@ -140,7 +146,7 @@ function getOdooProductState(product: CombinedProduct): odoo.OdooProductState {
   <div class="space-y-4">
     <div class="flex flex-wrap gap-4 items-center">
       <ButtonGroup>
-        <Select v-model="settings.selectedProfile.value" class="inline-flex">
+        <Select v-model="selectedProfile" class="inline-flex">
           <SelectTrigger>
             <User class="w-4 h-4 mr-2" />
             <SelectValue placeholder="Sélectionnez un profil" />
@@ -157,7 +163,7 @@ function getOdooProductState(product: CombinedProduct): odoo.OdooProductState {
         </Select>
         <Button
           variant="outline"
-          :disabled="!settings.selectedProfile.value"
+          :disabled="!selectedProfile"
           @click="openProfileUrl()"
         >
           <Eye class="w-4 h-4 mr-2" />
@@ -167,13 +173,13 @@ function getOdooProductState(product: CombinedProduct): odoo.OdooProductState {
       <div class="flex items-center gap-2 flex-1 min-w-fit">
         <Search class="w-4 h-4 text-muted-foreground" />
         <Input
-          v-model="settings.searchQuery.value"
+          v-model="searchQuery"
           placeholder="Rechercher par titre ou description..."
           class="flex-1"
         />
       </div>
 
-      <Select v-model="settings.selectedFilter.value" class="inline-flex">
+      <Select v-model="selectedFilter" class="inline-flex">
         <SelectTrigger>
           <Filter class="w-4 h-4 mr-2" />
           <SelectValue placeholder="Filtrer par état" />
@@ -191,7 +197,7 @@ function getOdooProductState(product: CombinedProduct): odoo.OdooProductState {
           </SelectItem>
         </SelectContent>
       </Select>
-      <Select v-model="settings.selectedOrderBy.value" class="inline-flex">
+      <Select v-model="selectedOrderBy" class="inline-flex">
         <SelectTrigger>
           <ArrowDownAZ class="w-4 h-4 mr-2" />
           <SelectValue placeholder="Trier par" />

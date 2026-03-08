@@ -1,4 +1,9 @@
-import { CombinedProduct, OrderBy, ProductState } from "./settings";
+import { CombinedProduct, ProductState } from "./settings";
+
+export enum OrderBy {
+  DATE = "date",
+  PRICE = "price",
+}
 
 export const ProductStateLabels: Record<ProductState, string> = {
   [ProductState.ACTIVE]: "Disponible",

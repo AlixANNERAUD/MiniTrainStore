@@ -20,11 +20,6 @@ export const useSettingsStore = defineWxtStore(SETTINGS_KEY, {
       state.tags = DEFAULT_SETTINGS.tags;
       state.odoo = DEFAULT_SETTINGS.odoo;
       state.profiles = DEFAULT_SETTINGS.profiles;
-      state.selectedProfile = DEFAULT_SETTINGS.selectedProfile;
-      state.selectedFilter = DEFAULT_SETTINGS.selectedFilter;
-      state.selectedOrderBy = DEFAULT_SETTINGS.selectedOrderBy;
-      state.currentTab = DEFAULT_SETTINGS.currentTab;
-      state.searchQuery = DEFAULT_SETTINGS.searchQuery;
     },
     addProfile(userIdentifier: string, displayName: string) {
       state.profiles[userIdentifier] = {
@@ -137,11 +132,6 @@ export const useSettingsStore = defineWxtStore(SETTINGS_KEY, {
       state.profiles = newSettings.profiles;
       state.tags = newSettings.tags;
       state.categories = newSettings.categories;
-      state.selectedProfile = newSettings.selectedProfile;
-      state.selectedFilter = newSettings.selectedFilter;
-      state.selectedOrderBy = newSettings.selectedOrderBy;
-      state.currentTab = newSettings.currentTab;
-      state.searchQuery = newSettings.searchQuery;
     },
     export(): SettingsData {
       return JSON.parse(JSON.stringify(state));
