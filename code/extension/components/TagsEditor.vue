@@ -38,9 +38,9 @@ const moveTagDown = (index: number) => {
 
 <template>
   <FieldSet>
-    <FieldLegend>Tags personnalisés</FieldLegend>
+    <FieldLegend>Étiquettes personnalisées</FieldLegend>
     <FieldDescription>
-      Créez des tags personnalisés pour organiser vos produits selon des motifs
+      Créez des étiquettes personnalisées pour organiser vos produits selon des motifs
       spécifiques (expressions régulières).
     </FieldDescription>
     <FieldSeparator />
