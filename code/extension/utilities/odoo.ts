@@ -104,6 +104,7 @@ export async function getAllProducts(): Promise<
   {
     identifier: string;
     active: boolean;
+    url: string;
   }[]
 > {
   const ResponseSchema = z.array(
@@ -112,11 +113,12 @@ export async function getAllProducts(): Promise<
       display_name: z.string(),
       default_code: z.union([z.string(), z.boolean()]),
       active: z.boolean(),
+      website_absolute_url: z.string(),
     }),
   );
 
   const response = await requestOdoo("product.template", "search_read", {
-    fields: ["display_name", "default_code", "active"],
+    fields: ["display_name", "default_code", "active", "website_absolute_url"],
     domain: [["display_name", "ilike", "a%"]], // Example: fetch all products with default_code starting with 'a'
   });
 
@@ -131,11 +133,13 @@ export async function getAllProducts(): Promise<
         display_name: string;
         default_code: string;
         active: boolean;
+        website_absolute_url: string;
       } => typeof record.default_code === "string",
     )
     .map((record) => ({
       identifier: record.default_code,
       active: record.active,
+      url: record.website_absolute_url,
     }));
 }
 

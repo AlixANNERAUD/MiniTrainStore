@@ -22,6 +22,7 @@ import { formatDate } from "@/utilities/format";
 const { product, odooState } = defineProps<{
   product: CombinedProduct;
   odooState: odoo.OdooProductState;
+  odooUrl: string | null;
 }>();
 
 const emit = defineEmits(["exportProduct"]);
@@ -130,6 +131,14 @@ async function exportProduct(product: CombinedProduct) {
               >Exporter</span
             >
             <span v-else>Mettre à jour</span>
+          </Button>
+          <Button
+            v-if="odooState !== odoo.OdooProductState.NOT_FOUND && odooUrl"
+            variant="outline"
+            size="sm"
+            @click="openUrl(odooUrl)"
+          >
+            Voir sur Odoo
           </Button>
         </div>
       </ItemActions>

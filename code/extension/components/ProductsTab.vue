@@ -69,7 +69,15 @@ function openProfileUrl() {
   openUrl(getProfileUrl(settings.selectedProfile.value || ""));
 }
 
-const odooProducts = ref<Map<string, boolean>>(new Map());
+const odooProducts = ref<
+  Map<
+    string,
+    {
+      active: boolean;
+      url: string;
+    }
+  >
+>(new Map());
 
 const isLoading = ref(false);
 
@@ -85,9 +93,12 @@ async function updateOdooProducts() {
     .getAllProducts()
     .then(
       (products) => {
-        const productMap = new Map<string, boolean>();
+        const productMap = new Map<string, { active: boolean; url: string }>();
         products.forEach((product) => {
-          productMap.set(product.identifier, product.active);
+          productMap.set(product.identifier, {
+            active: product.active,
+            url: product.url,
+          });
         });
         odooProducts.value = productMap;
       },
@@ -197,6 +208,7 @@ function getOdooProductState(product: CombinedProduct): odoo.OdooProductState {
           :key="product.identifier"
           :product="product"
           :odoo-state="getOdooProductState(product)"
+          :odoo-url="odooProducts.get(product.identifier)?.url || null"
           @export-product="updateOdooProducts"
         />
       </ItemGroup>
