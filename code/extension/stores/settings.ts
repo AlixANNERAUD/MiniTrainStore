@@ -131,8 +131,18 @@ export const useSettingsStore = defineWxtStore(SETTINGS_KEY, {
         state.profiles[userIdentifier].lastScraped = new Date().toISOString();
       }
     },
+    import(newSettings: SettingsData) {
+      state.odoo = newSettings.odoo;
+      state.profiles = newSettings.profiles;
+      state.tags = newSettings.tags;
+      state.categories = newSettings.categories;
+      state.selectedProfile = newSettings.selectedProfile;
+      state.selectedFilter = newSettings.selectedFilter;
+      state.selectedOrderBy = newSettings.selectedOrderBy;
+      state.currentTab = newSettings.currentTab;
+    },
     export(): SettingsData {
-      return state;
+      return JSON.parse(JSON.stringify(state));
     },
   }),
 });
