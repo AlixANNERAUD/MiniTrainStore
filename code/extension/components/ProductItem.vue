@@ -106,7 +106,6 @@ async function exportProduct(product: CombinedProduct) {
         </ItemDescription>
       </ItemContent>
       <ItemActions>
-        <div class="flex flex-col items-end gap-1"></div>
         <div class="flex flex-col items-start gap-1">
           <Button
             variant="outline"
