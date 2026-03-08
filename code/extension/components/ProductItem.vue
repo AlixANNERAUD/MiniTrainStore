@@ -72,11 +72,21 @@ async function exportProduct(product: CombinedProduct) {
           {{ product.listing.title }}
         </ItemTitle>
         <ItemDescription>{{ product.detail?.description }}</ItemDescription>
-        <ItemDescription v-if="product.detail">
-          Photos :
-          {{ product.detail.photos.length }}
+        <ItemDescription>
+          <Badge :class="ProductStateColors[product.listing.state]">
+            {{
+              ProductStateLabels[product.listing.state] || product.listing.state
+            }}
+          </Badge>
+          <Badge variant="outline"> {{ product.listing.price }} €</Badge>
+          <Badge variant="outline">
+            {{ formatDate(product.listing.date) }}
+          </Badge>
+          <Badge v-if="product.detail" variant="outline">
+            {{ product.detail?.photos.length || 0 }} photos
+          </Badge>
         </ItemDescription>
-        <ItemDescription class="text-sm text-muted-foreground">
+        <ItemDescription>
           Catégorie :
           <Badge variant="outline">
             {{ getCategoryForProduct(product) }}
@@ -92,19 +102,11 @@ async function exportProduct(product: CombinedProduct) {
             {{ tag }}
           </Badge>
         </ItemDescription>
+        <ItemDescription class="text-sm text-muted-foreground">
+        </ItemDescription>
       </ItemContent>
       <ItemActions>
-        <div class="flex flex-col items-end gap-1">
-          <Badge :class="ProductStateColors[product.listing.state]">
-            {{
-              ProductStateLabels[product.listing.state] || product.listing.state
-            }}
-          </Badge>
-          <Badge variant="outline"> {{ product.listing.price }} € </Badge>
-          <Badge variant="outline">
-            {{ formatDate(product.listing.date) }}
-          </Badge>
-        </div>
+        <div class="flex flex-col items-end gap-1"></div>
         <div class="flex flex-col items-start gap-1">
           <Button
             variant="outline"
