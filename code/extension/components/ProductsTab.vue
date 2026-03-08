@@ -16,9 +16,10 @@ import {
 import { CombinedProduct, ProductState } from "@/utilities/settings";
 
 import Separator from "@/components/ui/separator/Separator.vue";
+import Input from "@/components/ui/input/Input.vue";
 
 import Button from "@/components/ui/button/Button.vue";
-import { ArrowDownAZ, Eye, Filter, User } from "lucide-vue-next";
+import { ArrowDownAZ, Eye, Filter, Search, User } from "lucide-vue-next";
 import ButtonGroup from "./ui/button-group/ButtonGroup.vue";
 import { getProfileUrl } from "@/utilities/profile/location";
 
@@ -54,6 +55,7 @@ const sortedAndFilteredProducts = computed(() => {
         settings.selectedFilter.value !== "ALL"
           ? settings.selectedFilter.value
           : undefined,
+      query: settings.searchQuery.value.trim() || undefined,
     },
     settings.selectedOrderBy.value,
   );
@@ -161,6 +163,15 @@ function getOdooProductState(product: CombinedProduct): odoo.OdooProductState {
           <Eye class="w-4 h-4 mr-2" />
         </Button>
       </ButtonGroup>
+
+      <div class="flex items-center gap-2 flex-1 min-w-fit">
+        <Search class="w-4 h-4 text-muted-foreground" />
+        <Input
+          v-model="settings.searchQuery.value"
+          placeholder="Rechercher par titre ou description..."
+          class="flex-1"
+        />
+      </div>
 
       <Select v-model="settings.selectedFilter.value" class="inline-flex">
         <SelectTrigger>

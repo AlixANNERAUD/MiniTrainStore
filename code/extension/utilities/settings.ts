@@ -71,6 +71,7 @@ export interface SettingsData {
   selectedProfile: string | null;
   selectedFilter: ProductState | "ALL";
   selectedOrderBy: OrderBy;
+  searchQuery: string;
   currentTab: 0;
 }
 
@@ -118,5 +119,6 @@ export const DEFAULT_SETTINGS: SettingsData = {
   selectedProfile: null,
   selectedFilter: "ALL",
   selectedOrderBy: OrderBy.DATE,
+  searchQuery: "",
   currentTab: 0,
 };

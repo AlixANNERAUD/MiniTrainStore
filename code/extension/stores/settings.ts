@@ -24,6 +24,7 @@ export const useSettingsStore = defineWxtStore(SETTINGS_KEY, {
       state.selectedFilter = DEFAULT_SETTINGS.selectedFilter;
       state.selectedOrderBy = DEFAULT_SETTINGS.selectedOrderBy;
       state.currentTab = DEFAULT_SETTINGS.currentTab;
+      state.searchQuery = DEFAULT_SETTINGS.searchQuery;
     },
     addProfile(userIdentifier: string, displayName: string) {
       state.profiles[userIdentifier] = {
@@ -140,6 +141,7 @@ export const useSettingsStore = defineWxtStore(SETTINGS_KEY, {
       state.selectedFilter = newSettings.selectedFilter;
       state.selectedOrderBy = newSettings.selectedOrderBy;
       state.currentTab = newSettings.currentTab;
+      state.searchQuery = newSettings.searchQuery;
     },
     export(): SettingsData {
       return JSON.parse(JSON.stringify(state));
