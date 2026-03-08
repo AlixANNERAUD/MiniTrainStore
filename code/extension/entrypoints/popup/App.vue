@@ -20,7 +20,7 @@ const tabs = ["Produits", "Réglages"];
 </script>
 
 <template>
-  <Card class="w-200">
+  <Card class="w-160 h-auto border-0">
     <CardHeader>
       <CardTitle>Mini Train Store</CardTitle>
       <CardDescription>Gestion des profils et des annonces</CardDescription>
@@ -29,7 +29,7 @@ const tabs = ["Produits", "Réglages"];
       <Tabs
         v-model="settings.currentTab.value"
         :default-value="0"
-        class="w-full"
+        class="w-full h-full"
       >
         <TabsList class="w-full">
           <TabsTrigger

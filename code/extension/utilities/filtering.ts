@@ -8,7 +8,7 @@ export const ProductStateLabels: Record<ProductState, string> = {
 };
 
 export const OrderByLabels: Record<OrderBy, string> = {
-  [OrderBy.DATE]: "Date de publication",
+  [OrderBy.DATE]: "Date",
   [OrderBy.PRICE]: "Prix",
 };
 

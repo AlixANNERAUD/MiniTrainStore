@@ -181,7 +181,7 @@ function getOdooProductState(product: CombinedProduct): odoo.OdooProductState {
 
     <Separator />
 
-    <ScrollArea class="h-100 w-full">
+    <ScrollArea class="w-full h-80">
       <ItemGroup class="gap-4">
         <ProductItem
           v-for="product in sortedAndFilteredProducts"
