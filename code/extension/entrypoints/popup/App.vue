@@ -13,6 +13,7 @@ import TabsContent from "@/components/ui/tabs/TabsContent.vue";
 import ProductsTab from "@/components/ProductsTab.vue";
 import SettingsTab from "@/components/SettingsTab.vue";
 import { useSettingsStore } from "@/stores/settings";
+import { TrainFrontTunnel } from "lucide-vue-next";
 
 const settings = useSettingsStore();
 
@@ -22,10 +23,13 @@ const tabs = ["Produits", "Réglages"];
 <template>
   <Card class="w-160 h-auto border-0">
     <CardHeader>
-      <CardTitle>Mini Train Store</CardTitle>
-      <CardDescription>Gestion des profils et des annonces</CardDescription>
+      <div class="flex items-center gap-2">
+        <TrainFrontTunnel />
+        <CardTitle>Mini Train Store</CardTitle> -
+        <CardDescription>Gestion des profils et des annonces</CardDescription>
+      </div>
     </CardHeader>
-    <CardContent class="space-y-4">
+    <CardContent>
       <Tabs
         v-model="settings.currentTab.value"
         :default-value="0"
