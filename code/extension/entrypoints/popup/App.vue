@@ -12,7 +12,6 @@ import TabsTrigger from "@/components/ui/tabs/TabsTrigger.vue";
 import TabsContent from "@/components/ui/tabs/TabsContent.vue";
 import ProductsTab from "@/components/ProductsTab.vue";
 import SettingsTab from "@/components/SettingsTab.vue";
-import { TrainFrontTunnel } from "lucide-vue-next";
 import { storageRef } from "@/utilities/browser";
 
 const currentTab = storageRef("currentTab", 0);
