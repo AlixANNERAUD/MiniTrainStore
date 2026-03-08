@@ -133,10 +133,10 @@ async function exportProduct(product: CombinedProduct) {
             <span v-else>Mettre à jour</span>
           </Button>
           <Button
-            v-if="odooState !== odoo.OdooProductState.NOT_FOUND && odooUrl"
             variant="outline"
             size="sm"
-            @click="openUrl(odooUrl)"
+            :disabled="odooUrl === null"
+            @click="openUrl(odooUrl || '')"
           >
             Voir sur Odoo
           </Button>
