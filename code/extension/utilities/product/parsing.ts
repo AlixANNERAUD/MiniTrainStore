@@ -74,7 +74,7 @@ export function getSeeMoreButton(): HTMLButtonElement | null {
   return seeMoreButton || null;
 }
 
-export function getDescription(): string {
+export async function getDescription(): Promise<string> {
   // Try multiple selectors for description
   // Check for "See more" button and click it
   const seeMoreButton = getSeeMoreButton();
@@ -87,15 +87,18 @@ export function getDescription(): string {
     }
   }
 
+  // Wait a moment for content to expand
+  await new Promise((resolve) => setTimeout(resolve, 100));
+
   const selectors = [
-    'p[id="readme-content"]', // New selector for description
+    "p#readme-content", // New selector for description
   ];
 
   for (const selector of selectors) {
-    const elem = document.querySelector(selector);
+    const elem = document.querySelectorAll(selector);
 
-    if (elem) {
-      return elem.textContent?.trim() || "";
+    if (elem.length > 0) {
+      return elem[0].textContent?.trim() || "";
     }
   }
 
@@ -103,7 +106,7 @@ export function getDescription(): string {
 }
 
 export async function parseProductDetails(): Promise<ProductDetail> {
-  const description = getDescription();
+  const description = await getDescription();
   const photos = await getPhotoUrls();
 
   return {

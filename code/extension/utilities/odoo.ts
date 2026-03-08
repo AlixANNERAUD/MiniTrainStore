@@ -55,9 +55,9 @@ export interface ProductTemplateRequest {
   product_tag_ids: [number, number, number[]][];
   taxes_id: [number, number, number[]][];
   default_code: string;
-  create_date: string;
+  //create_date: string;
   publish_date: string;
-  write_date: string;
+  //write_date: string;
   image_1920?: string; // base64-encoded image
   categ_id?: number; // category ID
   public_categ_ids?: [number, number, number[]][];
@@ -337,6 +337,7 @@ async function productToOdooDict(
 
   const { firstImage, additionalImages } = await loadImages(product);
 
+  // Odoo expects UTC datetime in format: YYYY-MM-DD HH:MM:SS
   const createdDate = new Date(product.listing.date)
     .toISOString()
     .replace("T", " ")
@@ -351,11 +352,13 @@ async function productToOdooDict(
     description_ecommerce: descriptionHtml,
     product_tag_ids: [[6, 0, tagsIds]],
     taxes_id: [[6, 0, [taxId]]],
-    create_date: createdDate,
+    //create_date: createdDate,
     publish_date: createdDate,
-    write_date: createdDate,
+    //write_date: createdDate,
     image_1920: "", // to be set if firstImage is available
   };
+
+  console.log("Product data before images and category:", productData);
 
   if (firstImage) {
     productData.image_1920 = firstImage;
