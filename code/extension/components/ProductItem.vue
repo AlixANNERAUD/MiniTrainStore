@@ -18,6 +18,7 @@ import { ProductStateLabels } from "@/utilities/filtering";
 import { openUrl } from "@/utilities/browser";
 import Button from "./ui/button/Button.vue";
 import { formatDate } from "@/utilities/format";
+import { getWeightFromProduct } from "@/utilities/weight";
 
 const { product, odooState } = defineProps<{
   product: CombinedProduct;
@@ -28,6 +29,8 @@ const { product, odooState } = defineProps<{
 const emit = defineEmits(["exportProduct"]);
 
 const isExporting = ref(false);
+
+const weigth = getWeightFromProduct(product);
 
 const ProductStateColors: Record<ProductState, string> = {
   [ProductState.ACTIVE]: "bg-green-100 text-green-800",
@@ -84,6 +87,15 @@ async function exportProduct(product: CombinedProduct) {
           </Badge>
           <Badge v-if="product.detail" variant="outline">
             {{ product.detail?.photos.length || 0 }} photos
+          </Badge>
+          <Badge v-if="weigth" variant="outline">
+            {{
+              new Intl.NumberFormat("fr-FR", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 3,
+              }).format(weigth.weight)
+            }}
+            {{ weigth.weightUomName }}
           </Badge>
         </ItemDescription>
         <ItemDescription>

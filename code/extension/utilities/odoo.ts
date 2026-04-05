@@ -1,8 +1,9 @@
 import { useSettingsStore } from "@/stores/settings";
-import { getCategoryForProduct } from "./category";
-import { CombinedProduct, ProductState } from "./settings";
-import { getTagsForProduct } from "./tag";
+import { getCategoryForProduct } from "@/utilities/category";
+import { CombinedProduct, ProductState } from "@/utilities/settings";
+import { getTagsForProduct } from "@/utilities/tag";
 import { z } from "zod";
+import { getWeightFromProduct } from "@/utilities/weight";
 
 // Caches
 const TAGS_ID_CACHE: Map<string, number> = new Map();
@@ -55,6 +56,8 @@ export interface ProductTemplateRequest {
   product_tag_ids: [number, number, number[]][];
   taxes_id: [number, number, number[]][];
   default_code: string;
+  weight?: number;
+  weight_uom_name?: string;
   //create_date: string;
   publish_date: string;
   //write_date: string;
@@ -338,6 +341,7 @@ async function productToOdooDict(
   const description = product.detail?.description || "";
   const descriptionWithLink = `${description}\n\nDisponible également sur <a href="${product.listing.url}" target="_blank">leboncoin</a>.`;
   const descriptionHtml = stringToHtml(descriptionWithLink);
+  const extractedWeight = getWeightFromProduct(product);
 
   const { firstImage, additionalImages } = await loadImages(product);
 
@@ -366,6 +370,11 @@ async function productToOdooDict(
 
   if (firstImage) {
     productData.image_1920 = firstImage;
+  }
+
+  if (extractedWeight) {
+    productData.weight = extractedWeight.weight;
+    productData.weight_uom_name = extractedWeight.weightUomName;
   }
 
   if (additionalImages.length > 0) {
