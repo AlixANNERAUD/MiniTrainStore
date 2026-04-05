@@ -37,6 +37,10 @@ const selectedFilter = storageRef<ProductState | "ALL">(
   "selectedFilter",
   "ALL",
 );
+const selectedOdooProductState = storageRef<odoo.OdooProductState | "ALL">(
+  "selectedOdooProductState",
+  "ALL",
+);
 const searchQuery = storageRef("searchQuery", "");
 
 const profilesList = computed(() => {
@@ -66,12 +70,35 @@ const sortedAndFilteredProducts = computed(() => {
     selectedOrderBy.value,
   );
 
-  return filteredProducts;
+  const odooFilteredProducts = filteredProducts.filter((product) => {
+    const odooState = getOdooProductState(product);
+    return (
+      selectedOdooProductState.value === "ALL" ||
+      odooState === selectedOdooProductState.value
+    );
+  });
+
+  return odooFilteredProducts;
 });
 
 const productStatistics = computed(() =>
   getProductStatistics(combinedProducts.value),
 );
+
+const productOdooFilteredStatistics = computed(() => {
+  const stats: Record<odoo.OdooProductState, number> = {
+    [odoo.OdooProductState.NOT_FOUND]: 0,
+    [odoo.OdooProductState.EXISTS]: 0,
+    [odoo.OdooProductState.ACTIVE]: 0,
+  };
+
+  combinedProducts.value.forEach((product) => {
+    const odooState = getOdooProductState(product);
+    stats[odooState]++;
+  });
+
+  return stats;
+});
 
 function openProfileUrl() {
   openUrl(getProfileUrl(selectedProfile.value || ""));
@@ -194,6 +221,28 @@ function getOdooProductState(product: CombinedProduct): odoo.OdooProductState {
             :value="key"
           >
             {{ label }} ({{ productStatistics[key as ProductState] || 0 }})
+          </SelectItem>
+        </SelectContent>
+      </Select>
+      <Select
+        v-model="selectedOdooProductState"
+        class="inline-flex"
+        :disabled="!settings.odoo.value.url || !settings.odoo.value.apiKey"
+      >
+        <SelectTrigger>
+          <Filter class="w-4 h-4 mr-2" />
+          <SelectValue placeholder="Filtrer par état Odoo" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="ALL">Tous</SelectItem>
+          <SelectItem
+            v-for="[key, label] in Object.entries(odoo.OdooProductStateLabels)"
+            :key="key"
+            :value="key"
+          >
+            {{ label }} ({{
+              productOdooFilteredStatistics[key as odoo.OdooProductState] || 0
+            }})
           </SelectItem>
         </SelectContent>
       </Select>

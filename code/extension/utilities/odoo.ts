@@ -17,6 +17,12 @@ export enum OdooProductState {
   ACTIVE = "active",
 }
 
+export const OdooProductStateLabels: Record<OdooProductState, string> = {
+  [OdooProductState.NOT_FOUND]: "Non trouvé",
+  [OdooProductState.EXISTS]: "Existe déjà",
+  [OdooProductState.ACTIVE]: "Actif",
+};
+
 export interface OdooConfig {
   url: string;
   apiKey: string;
@@ -455,6 +461,7 @@ export async function exportProduct(
 
     if (existingProductId === null) {
       if (
+        product.listing.state === ProductState.PURCHASE_PENDING ||
         product.listing.state === ProductState.PURCHASE_COMPLETED ||
         product.listing.state === ProductState.REMOVED
       ) {
@@ -475,6 +482,7 @@ export async function exportProduct(
     } else {
       // Product exists
       if (
+        product.listing.state === ProductState.PURCHASE_PENDING ||
         product.listing.state === ProductState.PURCHASE_COMPLETED ||
         product.listing.state === ProductState.REMOVED
       ) {

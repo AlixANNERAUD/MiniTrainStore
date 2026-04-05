@@ -136,7 +136,9 @@ async function exportProduct(product: CombinedProduct) {
             variant="outline"
             size="sm"
             :class="['w-full', 'justify-center', OdooStateColors[odooState]]"
-            :disabled="!product.detail"
+            :disabled="
+              !product.detail && odooState === odoo.OdooProductState.NOT_FOUND
+            "
             @click="exportProduct(product)"
           >
             <Spinner v-if="isExporting" class="w-4 h-4" />
