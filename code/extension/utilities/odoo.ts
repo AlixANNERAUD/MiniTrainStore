@@ -10,6 +10,7 @@ const TAGS_ID_CACHE: Map<string, number> = new Map();
 const CATEGORY_ID_CACHE: Map<string, number> = new Map();
 const PUBLIC_CATEGORY_ID_CACHE: Map<string, number> = new Map();
 const TAX_ID_CACHE: Map<string, number> = new Map();
+const IMAGE_VERTICAL_CROP_RATIO = 0.06;
 
 export enum OdooProductState {
   NOT_FOUND = "not_found",
@@ -273,7 +274,55 @@ async function getTaxId(): Promise<number> {
   return id;
 }
 
-// Download and convert image to base64
+async function cropImageVertically(blob: Blob): Promise<Blob> {
+  const imageBitmap = await createImageBitmap(blob);
+
+  try {
+    const cropOffset = Math.floor(
+      imageBitmap.height * IMAGE_VERTICAL_CROP_RATIO,
+    );
+    const croppedHeight = imageBitmap.height - cropOffset * 2;
+
+    if (cropOffset <= 0 || croppedHeight <= 0) {
+      return blob;
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = imageBitmap.width;
+    canvas.height = croppedHeight;
+
+    const context = canvas.getContext("2d");
+    if (!context) {
+      throw new Error("Unable to get canvas context for image crop");
+    }
+
+    context.drawImage(
+      imageBitmap,
+      0,
+      cropOffset,
+      imageBitmap.width,
+      croppedHeight,
+      0,
+      0,
+      imageBitmap.width,
+      croppedHeight,
+    );
+
+    const croppedBlob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, blob.type || "image/jpeg");
+    });
+
+    if (!croppedBlob) {
+      throw new Error("Failed to serialize cropped image");
+    }
+
+    return croppedBlob;
+  } finally {
+    imageBitmap.close();
+  }
+}
+
+// Download, crop (top and bottom), and convert image to base64
 async function downloadImageAsBase64(url: string): Promise<string> {
   const response = await fetch(url);
   if (!response.ok) {
@@ -281,6 +330,8 @@ async function downloadImageAsBase64(url: string): Promise<string> {
   }
 
   const blob = await response.blob();
+  const croppedBlob = await cropImageVertically(blob);
+
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -290,7 +341,7 @@ async function downloadImageAsBase64(url: string): Promise<string> {
       resolve(base64Data);
     };
     reader.onerror = reject;
-    reader.readAsDataURL(blob);
+    reader.readAsDataURL(croppedBlob);
   });
 }
 
