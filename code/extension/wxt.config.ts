@@ -25,8 +25,16 @@ export default defineConfig({
     version: "0.1.0",
     description:
       "Une extension pour suivre les prix des produits sur différents sites de e-commerce.",
-    permissions: ["storage"],
+    permissions: ["storage", "sidePanel"],
     host_permissions: ["<all_urls>"],
+    sidebar_action: {
+      default_panel: "sidepanel.html",
+      default_title: "Mini Train Store",
+      default_icon: "icon/128.png",
+    },
+    side_panel: {
+      default_path: "sidepanel.html",
+    },
     browser_specific_settings: {
       gecko: {
         id: "@volte",
