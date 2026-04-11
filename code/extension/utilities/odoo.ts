@@ -10,7 +10,7 @@ const TAGS_ID_CACHE: Map<string, number> = new Map();
 const CATEGORY_ID_CACHE: Map<string, number> = new Map();
 const PUBLIC_CATEGORY_ID_CACHE: Map<string, number> = new Map();
 const TAX_ID_CACHE: Map<string, number> = new Map();
-const IMAGE_VERTICAL_CROP_RATIO = 0.06;
+const DEFAULT_IMAGE_VERTICAL_CROP_RATIO = 0.06;
 
 export enum OdooProductState {
   NOT_FOUND = "not_found",
@@ -274,13 +274,18 @@ async function getTaxId(): Promise<number> {
   return id;
 }
 
-async function cropImageVertically(blob: Blob): Promise<Blob> {
+async function cropImageVertically(
+  blob: Blob,
+  cropRatio: number,
+): Promise<Blob> {
   const imageBitmap = await createImageBitmap(blob);
 
   try {
-    const cropOffset = Math.floor(
-      imageBitmap.height * IMAGE_VERTICAL_CROP_RATIO,
-    );
+    const normalizedCropRatio = Number.isFinite(cropRatio)
+      ? Math.min(Math.max(cropRatio, 0), 0.49)
+      : DEFAULT_IMAGE_VERTICAL_CROP_RATIO;
+
+    const cropOffset = Math.floor(imageBitmap.height * normalizedCropRatio);
     const croppedHeight = imageBitmap.height - cropOffset * 2;
 
     if (cropOffset <= 0 || croppedHeight <= 0) {
@@ -324,13 +329,18 @@ async function cropImageVertically(blob: Blob): Promise<Blob> {
 
 // Download, crop (top and bottom), and convert image to base64
 async function downloadImageAsBase64(url: string): Promise<string> {
+  const settings = useSettingsStore();
+
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Failed to download image from ${url}`);
   }
 
   const blob = await response.blob();
-  const croppedBlob = await cropImageVertically(blob);
+  const croppedBlob = await cropImageVertically(
+    blob,
+    settings.odoo.value.imageVerticalCropRatio,
+  );
 
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

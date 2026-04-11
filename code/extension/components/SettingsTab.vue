@@ -95,6 +95,24 @@ function importSettings() {
             Fournissez la clé API pour authentifier les requêtes.
           </FieldDescription>
         </Field>
+        <Field>
+          <FieldLabel for="odoo-image-crop-ratio">
+            Ratio de recadrage vertical des images
+          </FieldLabel>
+          <Input
+            id="odoo-image-crop-ratio"
+            v-model.number="settings.odoo.value.imageVerticalCropRatio"
+            type="number"
+            min="0"
+            max="0.49"
+            step="0.01"
+            class="w-80"
+            placeholder="0.06"
+          />
+          <FieldDescription>
+            Pourcentage retiré en haut et en bas de chaque image (0.06 = 6 %).
+          </FieldDescription>
+        </Field>
       </FieldSet>
       <FieldSeparator />
       <CategoriesEditor />

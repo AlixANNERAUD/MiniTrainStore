@@ -46,6 +46,7 @@ export interface ProfileData {
 export interface OdooSettings {
   url: string;
   apiKey: string;
+  imageVerticalCropRatio: number;
 }
 
 export interface TagSettings {
@@ -70,6 +71,7 @@ export const DEFAULT_SETTINGS: SettingsData = {
   odoo: {
     url: "",
     apiKey: "",
+    imageVerticalCropRatio: 0.06,
   },
   profiles: {},
   tags: [

@@ -18,7 +18,7 @@ export const useSettingsStore = defineWxtStore(SETTINGS_KEY, {
     reset() {
       state.categories = DEFAULT_SETTINGS.categories;
       state.tags = DEFAULT_SETTINGS.tags;
-      state.odoo = DEFAULT_SETTINGS.odoo;
+      state.odoo = { ...DEFAULT_SETTINGS.odoo };
       state.profiles = DEFAULT_SETTINGS.profiles;
     },
     addProfile(userIdentifier: string, displayName: string) {
@@ -128,7 +128,10 @@ export const useSettingsStore = defineWxtStore(SETTINGS_KEY, {
       }
     },
     import(newSettings: SettingsData) {
-      state.odoo = newSettings.odoo;
+      state.odoo = {
+        ...DEFAULT_SETTINGS.odoo,
+        ...newSettings.odoo,
+      };
       state.profiles = newSettings.profiles;
       state.tags = newSettings.tags;
       state.categories = newSettings.categories;
