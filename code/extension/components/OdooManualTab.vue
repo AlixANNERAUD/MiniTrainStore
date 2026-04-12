@@ -5,7 +5,6 @@ import {
   Field,
   FieldDescription,
   FieldLabel,
-  FieldLegend,
   FieldSet,
 } from "@/components/ui/field";
 import Input from "@/components/ui/input/Input.vue";
@@ -346,7 +345,7 @@ onMounted(() => {
 <template>
   <div class="h-full min-h-0 flex flex-col gap-3">
     <div class="flex items-center gap-2">
-      <Button variant="outline" @click="refreshProducts" :disabled="isLoading">
+      <Button variant="outline" :disabled="isLoading" @click="refreshProducts">
         Rafraichir
       </Button>
       <Button variant="outline" @click="createNewProduct">Nouveau</Button>
@@ -505,13 +504,13 @@ onMounted(() => {
 
           <Field>
             <label class="flex items-center gap-2 text-sm">
-              <input type="checkbox" v-model="selectedProduct.active" />
+              <input v-model="selectedProduct.active" type="checkbox" />
               Actif
             </label>
             <label class="flex items-center gap-2 text-sm">
               <input
-                type="checkbox"
                 v-model="selectedProduct.website_published"
+                type="checkbox"
               />
               Publie sur le site
             </label>
