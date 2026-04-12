@@ -31,6 +31,7 @@ interface EditableManualProduct {
   name: string;
   default_code: string;
   list_price: number;
+  weight: number;
   active: boolean;
   website_published: boolean;
   description_text: string;
@@ -52,6 +53,7 @@ const selectedProduct = ref<EditableManualProduct>({
   name: "",
   default_code: "",
   list_price: 0,
+  weight: 0,
   active: true,
   website_published: true,
   description_text: "",
@@ -151,6 +153,7 @@ function mapToEditable(
       name: "",
       default_code: "",
       list_price: 0,
+      weight: 0,
       active: true,
       website_published: true,
       description_text: "",
@@ -165,6 +168,7 @@ function mapToEditable(
     name: product.name,
     default_code: product.default_code,
     list_price: product.list_price,
+    weight: product.weight,
     active: product.active,
     website_published: product.website_published,
     description_text: odoo.htmlToPlainText(product.description_ecommerce),
@@ -181,6 +185,7 @@ function toManualInput(
     name: product.name.trim(),
     default_code: product.default_code.trim(),
     list_price: Number.isFinite(product.list_price) ? product.list_price : 0,
+    weight: Number.isFinite(product.weight) ? product.weight : 0,
     active: product.active,
     website_published: product.website_published,
     description_ecommerce: odoo.plainTextToHtml(
@@ -393,7 +398,7 @@ onMounted(() => {
   </div>
 
   <Sheet v-model:open="isEditorOpen">
-    <SheetContent side="right" class="w-[85vw] max-w-3xl p-0">
+    <SheetContent side="right" class="w-[92vw]! max-w-4xl! p-0">
       <SheetHeader class="border-b">
         <SheetTitle>
           {{
@@ -429,6 +434,17 @@ onMounted(() => {
               v-model.number="selectedProduct.list_price"
               type="number"
               step="0.01"
+              min="0"
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel for="manual-weight">Poids (kg)</FieldLabel>
+            <Input
+              id="manual-weight"
+              v-model.number="selectedProduct.weight"
+              type="number"
+              step="0.001"
               min="0"
             />
           </Field>

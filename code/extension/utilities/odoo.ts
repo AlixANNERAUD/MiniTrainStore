@@ -52,6 +52,7 @@ export interface OdooManualProduct {
   name: string;
   default_code: string;
   list_price: number;
+  weight: number;
   active: boolean;
   website_published: boolean;
   description_ecommerce: string;
@@ -62,6 +63,7 @@ export interface OdooManualProductInput {
   name: string;
   default_code: string;
   list_price: number;
+  weight?: number;
   active: boolean;
   website_published: boolean;
   description_ecommerce: string;
@@ -201,6 +203,7 @@ export async function getManualProducts(): Promise<OdooManualProduct[]> {
       name: z.string(),
       default_code: z.union([z.string(), z.boolean()]),
       list_price: z.number(),
+      weight: z.union([z.number(), z.boolean()]),
       active: z.boolean(),
       website_published: z.boolean(),
       description_ecommerce: z.union([z.string(), z.boolean()]),
@@ -213,6 +216,7 @@ export async function getManualProducts(): Promise<OdooManualProduct[]> {
       "name",
       "default_code",
       "list_price",
+      "weight",
       "active",
       "website_published",
       "description_ecommerce",
@@ -230,6 +234,7 @@ export async function getManualProducts(): Promise<OdooManualProduct[]> {
       default_code:
         typeof record.default_code === "string" ? record.default_code : "",
       list_price: record.list_price,
+      weight: typeof record.weight === "number" ? record.weight : 0,
       active: record.active,
       website_published: record.website_published,
       description_ecommerce:
