@@ -62,7 +62,7 @@ function importSettings() {
 </script>
 
 <template>
-  <ScrollArea class="h-100 w-full">
+  <ScrollArea class="h-full w-full min-h-0">
     <FieldGroup>
       <FieldSet>
         <FieldLegend>Configuration Odoo</FieldLegend>

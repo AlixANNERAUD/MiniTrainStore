@@ -8,7 +8,6 @@ import Tabs from "@/components/ui/tabs/Tabs.vue";
 import TabsList from "@/components/ui/tabs/TabsList.vue";
 import TabsTrigger from "@/components/ui/tabs/TabsTrigger.vue";
 import TabsContent from "@/components/ui/tabs/TabsContent.vue";
-import { Button } from "@/components/ui/button";
 import ProductsTab from "@/components/ProductsTab.vue";
 import SettingsTab from "@/components/SettingsTab.vue";
 import { storageRef } from "@/utilities/browser";
@@ -17,30 +16,12 @@ import ExtensionHeader from "@/components/ExtensionHeader.vue";
 const currentTab = storageRef("currentTab", 0);
 
 const tabs = ["Produits", "Réglages"];
-
-async function openInSeparateWindow() {
-  await browser.windows.create({
-    url: browser.runtime.getURL("/main.html"),
-    type: "popup",
-    state: "maximized",
-  });
-}
 </script>
 
 <template>
-  <Card
-    class="w-full max-w-160 h-full border-0 flex flex-col box-border overflow-hidden"
-  >
+  <Card class="h-full border-0 flex flex-col">
     <CardHeader>
-      <ExtensionHeader>
-        <Button
-          class="ml-auto"
-          variant="outline"
-          @click="openInSeparateWindow()"
-        >
-          Ouvrir en fenetre
-        </Button>
-      </ExtensionHeader>
+      <ExtensionHeader />
     </CardHeader>
     <CardContent class="flex-1 min-h-0">
       <Tabs

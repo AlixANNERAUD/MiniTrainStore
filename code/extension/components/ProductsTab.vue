@@ -170,7 +170,7 @@ function getOdooProductState(product: CombinedProduct): odoo.OdooProductState {
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div class="space-y-4 h-full min-h-0 flex flex-col">
     <div class="flex flex-wrap gap-4 items-center">
       <ButtonGroup>
         <Select v-model="selectedProfile" class="inline-flex">
@@ -267,7 +267,7 @@ function getOdooProductState(product: CombinedProduct): odoo.OdooProductState {
 
     <Separator />
 
-    <ScrollArea class="w-full h-80">
+    <ScrollArea class="w-full flex-1 min-h-0">
       <ItemGroup class="gap-4">
         <ProductItem
           v-for="product in sortedAndFilteredProducts"
