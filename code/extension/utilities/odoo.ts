@@ -47,6 +47,28 @@ export interface OdooBulkExportResult {
   errors: Array<{ productId: string; error: string }>;
 }
 
+export interface OdooManualProduct {
+  id: number;
+  name: string;
+  default_code: string;
+  list_price: number;
+  active: boolean;
+  website_published: boolean;
+  description_ecommerce: string;
+  website_absolute_url: string;
+}
+
+export interface OdooManualProductInput {
+  name: string;
+  default_code: string;
+  list_price: number;
+  active: boolean;
+  website_published: boolean;
+  description_ecommerce: string;
+  image_1920?: string;
+  product_template_image_ids?: [number, number, unknown][];
+}
+
 export const SearchResponseSchema = z.array(
   z.object({
     id: z.number(),
@@ -110,6 +132,25 @@ function stringToHtml(str: string): string {
   return str;
 }
 
+export function htmlToPlainText(html: string): string {
+  if (!html) return "";
+
+  const normalized = html
+    .replace(/<br\s*\/?\s*>/gi, "\n")
+    .replace(/<\/p>/gi, "\n\n")
+    .replace(/<p[^>]*>/gi, "");
+
+  const container = document.createElement("div");
+  container.innerHTML = normalized;
+  return (container.textContent || "").trim();
+}
+
+export function plainTextToHtml(text: string): string {
+  const container = document.createElement("div");
+  container.textContent = text;
+  return stringToHtml(container.innerHTML);
+}
+
 export async function getAllProducts(): Promise<
   {
     identifier: string;
@@ -151,6 +192,92 @@ export async function getAllProducts(): Promise<
       active: record.active,
       url: record.website_absolute_url,
     }));
+}
+
+export async function getManualProducts(): Promise<OdooManualProduct[]> {
+  const ResponseSchema = z.array(
+    z.object({
+      id: z.number(),
+      name: z.string(),
+      default_code: z.union([z.string(), z.boolean()]),
+      list_price: z.number(),
+      active: z.boolean(),
+      website_published: z.boolean(),
+      description_ecommerce: z.union([z.string(), z.boolean()]),
+      website_absolute_url: z.union([z.string(), z.boolean()]),
+    }),
+  );
+
+  const response = await requestOdoo("product.template", "search_read", {
+    fields: [
+      "name",
+      "default_code",
+      "list_price",
+      "active",
+      "website_published",
+      "description_ecommerce",
+      "website_absolute_url",
+    ],
+    domain: [],
+  });
+
+  const records = ResponseSchema.parse(response);
+
+  return records
+    .map((record) => ({
+      id: record.id,
+      name: record.name,
+      default_code:
+        typeof record.default_code === "string" ? record.default_code : "",
+      list_price: record.list_price,
+      active: record.active,
+      website_published: record.website_published,
+      description_ecommerce:
+        typeof record.description_ecommerce === "string"
+          ? record.description_ecommerce
+          : "",
+      website_absolute_url:
+        typeof record.website_absolute_url === "string"
+          ? record.website_absolute_url
+          : "",
+    }))
+    .sort((a, b) =>
+      a.name.localeCompare(b.name, "fr", { sensitivity: "base" }),
+    );
+}
+
+export async function createManualProduct(
+  product: OdooManualProductInput,
+): Promise<number> {
+  const response = await requestOdoo("product.template", "create", {
+    vals_list: [product],
+  });
+
+  if (Array.isArray(response) && typeof response[0] === "number") {
+    return response[0];
+  }
+
+  if (typeof response === "number") {
+    return response;
+  }
+
+  throw new Error("Unexpected create response format from Odoo");
+}
+
+export async function updateManualProduct(
+  productId: number,
+  product: OdooManualProductInput,
+): Promise<void> {
+  await requestOdoo("product.template", "write", {
+    ids: [productId],
+    vals: product,
+  });
+}
+
+export async function deleteManualProduct(productId: number): Promise<void> {
+  await requestOdoo("product.template", "unlink", {
+    ids: [productId],
+  });
 }
 
 // Search for product by title
@@ -328,7 +455,9 @@ async function cropImageVertically(
 }
 
 // Download, crop (top and bottom), and convert image to base64
-async function downloadImageAsBase64(url: string): Promise<string> {
+export async function downloadAndCropImageAsBase64(
+  url: string,
+): Promise<string> {
   const settings = useSettingsStore();
 
   const response = await fetch(url);
@@ -374,7 +503,7 @@ async function loadImages(
 
   // Download first image as base64 for the main product image (image_1920)
   try {
-    firstImage = await downloadImageAsBase64(
+    firstImage = await downloadAndCropImageAsBase64(
       getLargePhotoUrl(product.detail.photos[0]),
     );
   } catch (error) {
@@ -384,7 +513,7 @@ async function loadImages(
   // Download remaining images for product.image gallery records
   for (let i = 1; i < product.detail.photos.length; i++) {
     try {
-      const imageData = await downloadImageAsBase64(
+      const imageData = await downloadAndCropImageAsBase64(
         getLargePhotoUrl(product.detail.photos[i]),
       );
       additionalImages.push(imageData);

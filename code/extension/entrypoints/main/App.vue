@@ -10,12 +10,13 @@ import TabsTrigger from "@/components/ui/tabs/TabsTrigger.vue";
 import TabsContent from "@/components/ui/tabs/TabsContent.vue";
 import ProductsTab from "@/components/ProductsTab.vue";
 import SettingsTab from "@/components/SettingsTab.vue";
+import OdooManualTab from "@/components/OdooManualTab.vue";
 import { storageRef } from "@/utilities/browser";
 import ExtensionHeader from "@/components/ExtensionHeader.vue";
 
 const currentTab = storageRef("currentTab", 0);
 
-const tabs = ["Produits", "Réglages"];
+const tabs = ["Produits", "Odoo manuel", "Réglages"];
 </script>
 
 <template>
@@ -43,6 +44,9 @@ const tabs = ["Produits", "Réglages"];
           <ProductsTab />
         </TabsContent>
         <TabsContent :value="1">
+          <OdooManualTab />
+        </TabsContent>
+        <TabsContent :value="2">
           <SettingsTab />
         </TabsContent>
       </Tabs>
