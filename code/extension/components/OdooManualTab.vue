@@ -17,6 +17,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import Select from "@/components/ui/select/Select.vue";
+import SelectContent from "@/components/ui/select/SelectContent.vue";
+import SelectItem from "@/components/ui/select/SelectItem.vue";
+import SelectTrigger from "@/components/ui/select/SelectTrigger.vue";
+import SelectValue from "@/components/ui/select/SelectValue.vue";
 import { useSettingsStore } from "@/stores/settings";
 import { CombinedProduct, ProductState } from "@/utilities/settings";
 import * as odoo from "@/utilities/odoo";
@@ -41,6 +46,8 @@ const isSaving = ref(false);
 const isEditorOpen = ref(false);
 const products = ref<odoo.OdooManualProduct[]>([]);
 const selectedProductId = ref<number | null>(null);
+type ManualFilter = "ALL" | "SYNCED" | "MANUAL";
+const selectedManualFilter = ref<ManualFilter>("MANUAL");
 const selectedProduct = ref<EditableManualProduct>({
   id: null,
   name: "",
@@ -56,6 +63,48 @@ const selectedProduct = ref<EditableManualProduct>({
 
 const selectedFilesPreview = ref<string[]>([]);
 const selectedMainImagePreview = ref<string>("");
+
+const syncedIdentifiers = computed(() => {
+  const ids = new Set<string>();
+
+  Object.values(settings.profiles.value).forEach((profile) => {
+    Object.keys(profile.listings).forEach((identifier) => {
+      ids.add(identifier);
+    });
+  });
+
+  return ids;
+});
+
+const filteredProducts = computed(() => {
+  if (selectedManualFilter.value === "ALL") {
+    return products.value;
+  }
+
+  return products.value.filter((product) => {
+    const isSynced = syncedIdentifiers.value.has(product.default_code);
+    return selectedManualFilter.value === "SYNCED" ? isSynced : !isSynced;
+  });
+});
+
+const filterCounts = computed(() => {
+  let synced = 0;
+  let manual = 0;
+
+  products.value.forEach((product) => {
+    if (syncedIdentifiers.value.has(product.default_code)) {
+      synced++;
+      return;
+    }
+    manual++;
+  });
+
+  return {
+    all: products.value.length,
+    synced,
+    manual,
+  };
+});
 
 async function fileToBase64Data(file: File): Promise<string> {
   const reader = new FileReader();
@@ -301,6 +350,20 @@ onMounted(() => {
         Rafraichir
       </Button>
       <Button variant="outline" @click="createNewProduct">Nouveau</Button>
+      <Select v-model="selectedManualFilter" class="inline-flex">
+        <SelectTrigger>
+          <SelectValue placeholder="Filtrer les produits" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="ALL">Tous ({{ filterCounts.all }})</SelectItem>
+          <SelectItem value="SYNCED"
+            >Synchronises ({{ filterCounts.synced }})</SelectItem
+          >
+          <SelectItem value="MANUAL"
+            >Manuels ({{ filterCounts.manual }})</SelectItem
+          >
+        </SelectContent>
+      </Select>
     </div>
 
     <ScrollArea class="w-full flex-1 min-h-0">
@@ -313,7 +376,7 @@ onMounted(() => {
           sur Rafraichir.
         </div>
         <ProductItem
-          v-for="product in products"
+          v-for="product in filteredProducts"
           :key="product.id"
           :product="toCombinedProduct(product)"
           :odoo-state="
