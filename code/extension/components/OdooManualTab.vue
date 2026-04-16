@@ -18,7 +18,9 @@ import {
 } from "@/components/ui/sheet";
 import Select from "@/components/ui/select/Select.vue";
 import SelectContent from "@/components/ui/select/SelectContent.vue";
+import SelectGroup from "@/components/ui/select/SelectGroup.vue";
 import SelectItem from "@/components/ui/select/SelectItem.vue";
+import SelectLabel from "@/components/ui/select/SelectLabel.vue";
 import SelectTrigger from "@/components/ui/select/SelectTrigger.vue";
 import SelectValue from "@/components/ui/select/SelectValue.vue";
 import { useSettingsStore } from "@/stores/settings";
@@ -35,6 +37,8 @@ interface EditableManualProduct {
   active: boolean;
   website_published: boolean;
   description_text: string;
+  category_id: string;
+  tag_ids: string[];
   website_absolute_url: string;
   image_1920: string;
   gallery_images: string[];
@@ -45,6 +49,8 @@ const isLoading = ref(false);
 const isSaving = ref(false);
 const isEditorOpen = ref(false);
 const products = ref<odoo.OdooManualProduct[]>([]);
+const availableCategories = ref<odoo.OdooReferenceOption[]>([]);
+const availableTags = ref<odoo.OdooReferenceOption[]>([]);
 const selectedProductId = ref<number | null>(null);
 type ManualFilter = "ALL" | "SYNCED" | "MANUAL";
 const selectedManualFilter = ref<ManualFilter>("MANUAL");
@@ -57,6 +63,8 @@ const selectedProduct = ref<EditableManualProduct>({
   active: true,
   website_published: true,
   description_text: "",
+  category_id: "",
+  tag_ids: [],
   website_absolute_url: "",
   image_1920: "",
   gallery_images: [],
@@ -157,6 +165,8 @@ function mapToEditable(
       active: true,
       website_published: true,
       description_text: "",
+      category_id: "",
+      tag_ids: [],
       website_absolute_url: "",
       image_1920: "",
       gallery_images: [],
@@ -172,6 +182,15 @@ function mapToEditable(
     active: product.active,
     website_published: product.website_published,
     description_text: odoo.htmlToPlainText(product.description_ecommerce),
+    category_id:
+      availableCategories.value
+        .find((category) => category.name === product.category_name)
+        ?.id.toString() || "",
+    tag_ids: product.tag_names
+      .map((tagName) =>
+        availableTags.value.find((tag) => tag.name === tagName)?.id.toString(),
+      )
+      .filter((tagId): tagId is string => !!tagId),
     website_absolute_url: product.website_absolute_url,
     image_1920: "",
     gallery_images: [],
@@ -181,6 +200,11 @@ function mapToEditable(
 function toManualInput(
   product: EditableManualProduct,
 ): odoo.OdooManualProductInput {
+  const categoryId = Number(product.category_id);
+  const tagIds = product.tag_ids
+    .map((tagId) => Number(tagId))
+    .filter((tagId) => Number.isFinite(tagId) && tagId > 0);
+
   return {
     name: product.name.trim(),
     default_code: product.default_code.trim(),
@@ -210,6 +234,11 @@ function toManualInput(
             ),
           ]
         : [[5, 0, 0]],
+    public_categ_ids:
+      Number.isFinite(categoryId) && categoryId > 0
+        ? [[6, 0, [categoryId]]]
+        : undefined,
+    product_tag_ids: [[6, 0, tagIds]],
   };
 }
 
@@ -220,12 +249,22 @@ function isOdooConfigured(): boolean {
 async function refreshProducts() {
   if (!isOdooConfigured()) {
     products.value = [];
+    availableCategories.value = [];
+    availableTags.value = [];
     return;
   }
 
   isLoading.value = true;
   try {
-    products.value = await odoo.getManualProducts();
+    const [manualProducts, categories, tags] = await Promise.all([
+      odoo.getManualProducts(),
+      odoo.getAvailablePublicCategories(),
+      odoo.getAvailableTags(),
+    ]);
+
+    products.value = manualProducts;
+    availableCategories.value = categories;
+    availableTags.value = tags;
 
     if (selectedProductId.value) {
       const fresh = products.value.find(
@@ -398,7 +437,7 @@ onMounted(() => {
   </div>
 
   <Sheet v-model:open="isEditorOpen">
-    <SheetContent side="right" class="w-[92vw]! max-w-4xl! p-0">
+    <SheetContent side="right" class="!w-[92vw] !max-w-4xl p-0">
       <SheetHeader class="border-b">
         <SheetTitle>
           {{
@@ -461,6 +500,48 @@ onMounted(() => {
             <FieldDescription>
               Le texte est converti automatiquement en HTML pour Odoo.
             </FieldDescription>
+          </Field>
+
+          <Field>
+            <FieldLabel for="manual-category">Categorie</FieldLabel>
+            <Select v-model="selectedProduct.category_id">
+              <SelectTrigger class="w-full">
+                <SelectValue placeholder="Choisir une categorie" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Categories</SelectLabel>
+                  <SelectItem
+                    v-for="category in availableCategories"
+                    :key="category.id"
+                    :value="String(category.id)"
+                  >
+                    {{ category.name }}
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </Field>
+
+          <Field>
+            <FieldLabel for="manual-tags">Tags</FieldLabel>
+            <Select v-model="selectedProduct.tag_ids" multiple>
+              <SelectTrigger class="w-full">
+                <SelectValue placeholder="Choisir des tags" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Tags</SelectLabel>
+                  <SelectItem
+                    v-for="tag in availableTags"
+                    :key="tag.id"
+                    :value="String(tag.id)"
+                  >
+                    {{ tag.name }}
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </Field>
 
           <Field>

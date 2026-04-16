@@ -57,6 +57,8 @@ export interface OdooManualProduct {
   website_published: boolean;
   description_ecommerce: string;
   website_absolute_url: string;
+  category_name: string;
+  tag_names: string[];
 }
 
 export interface OdooManualProductInput {
@@ -67,8 +69,15 @@ export interface OdooManualProductInput {
   active: boolean;
   website_published: boolean;
   description_ecommerce: string;
+  product_tag_ids?: [number, number, number[]][];
+  public_categ_ids?: [number, number, number[]][];
   image_1920?: string;
   product_template_image_ids?: [number, number, unknown][];
+}
+
+export interface OdooReferenceOption {
+  id: number;
+  name: string;
 }
 
 export const SearchResponseSchema = z.array(
@@ -208,6 +217,8 @@ export async function getManualProducts(): Promise<OdooManualProduct[]> {
       website_published: z.boolean(),
       description_ecommerce: z.union([z.string(), z.boolean()]),
       website_absolute_url: z.union([z.string(), z.boolean()]),
+      public_categ_ids: z.array(z.number()),
+      product_tag_ids: z.array(z.number()),
     }),
   );
 
@@ -221,11 +232,51 @@ export async function getManualProducts(): Promise<OdooManualProduct[]> {
       "website_published",
       "description_ecommerce",
       "website_absolute_url",
+      "public_categ_ids",
+      "product_tag_ids",
     ],
     domain: [],
   });
 
   const records = ResponseSchema.parse(response);
+
+  const publicCategoryIds = Array.from(
+    new Set(records.flatMap((record) => record.public_categ_ids || [])),
+  );
+  const publicCategoryNameById = new Map<number, string>();
+
+  if (publicCategoryIds.length > 0) {
+    const categoriesResponse = await requestOdoo(
+      "product.public.category",
+      "search_read",
+      {
+        fields: ["display_name"],
+        domain: [["id", "in", publicCategoryIds]],
+      },
+    );
+
+    const categories = SearchResponseSchema.parse(categoriesResponse);
+    categories.forEach((category) => {
+      publicCategoryNameById.set(category.id, category.display_name);
+    });
+  }
+
+  const tagIds = Array.from(
+    new Set(records.flatMap((record) => record.product_tag_ids || [])),
+  );
+  const tagNameById = new Map<number, string>();
+
+  if (tagIds.length > 0) {
+    const tagsResponse = await requestOdoo("product.tag", "search_read", {
+      fields: ["display_name"],
+      domain: [["id", "in", tagIds]],
+    });
+
+    const tags = SearchResponseSchema.parse(tagsResponse);
+    tags.forEach((tag) => {
+      tagNameById.set(tag.id, tag.display_name);
+    });
+  }
 
   return records
     .map((record) => ({
@@ -245,7 +296,102 @@ export async function getManualProducts(): Promise<OdooManualProduct[]> {
         typeof record.website_absolute_url === "string"
           ? record.website_absolute_url
           : "",
+      category_name:
+        publicCategoryNameById.get(record.public_categ_ids[0]) || "",
+      tag_names: (record.product_tag_ids || [])
+        .map((tagId) => tagNameById.get(tagId))
+        .filter((tag): tag is string => !!tag),
     }))
+    .sort((a, b) =>
+      a.name.localeCompare(b.name, "fr", { sensitivity: "base" }),
+    );
+}
+
+export async function getCategoryIdByName(
+  categoryName: string,
+): Promise<number | undefined> {
+  const trimmed = categoryName.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  const response = await requestOdoo("product.category", "search_read", {
+    fields: ["display_name"],
+    domain: [["display_name", "=", trimmed]],
+  });
+
+  const records = SearchResponseSchema.parse(response);
+  return records[0]?.id;
+}
+
+export async function getTagIdsByNames(tagNames: string[]): Promise<number[]> {
+  const uniqueNames = Array.from(
+    new Set(tagNames.map((name) => name.trim()).filter(Boolean)),
+  );
+
+  if (uniqueNames.length === 0) {
+    return [];
+  }
+
+  return await Promise.all(
+    uniqueNames.map(async (name) => {
+      const response = await requestOdoo("product.tag", "search_read", {
+        fields: ["display_name"],
+        domain: [["display_name", "=", name]],
+      });
+
+      const records = SearchResponseSchema.parse(response);
+      const tag = records[0];
+      if (!tag) {
+        throw new Error(`Tag '${name}' not found in Odoo.`);
+      }
+      return tag.id;
+    }),
+  );
+}
+
+export async function getAvailableCategories(): Promise<OdooReferenceOption[]> {
+  const response = await requestOdoo("product.category", "search_read", {
+    fields: ["display_name"],
+    domain: [],
+  });
+
+  const records = SearchResponseSchema.parse(response);
+
+  return records
+    .map((record) => ({ id: record.id, name: record.display_name }))
+    .sort((a, b) =>
+      a.name.localeCompare(b.name, "fr", { sensitivity: "base" }),
+    );
+}
+
+export async function getAvailablePublicCategories(): Promise<
+  OdooReferenceOption[]
+> {
+  const response = await requestOdoo("product.public.category", "search_read", {
+    fields: ["display_name"],
+    domain: [],
+  });
+
+  const records = SearchResponseSchema.parse(response);
+
+  return records
+    .map((record) => ({ id: record.id, name: record.display_name }))
+    .sort((a, b) =>
+      a.name.localeCompare(b.name, "fr", { sensitivity: "base" }),
+    );
+}
+
+export async function getAvailableTags(): Promise<OdooReferenceOption[]> {
+  const response = await requestOdoo("product.tag", "search_read", {
+    fields: ["display_name"],
+    domain: [],
+  });
+
+  const records = SearchResponseSchema.parse(response);
+
+  return records
+    .map((record) => ({ id: record.id, name: record.display_name }))
     .sort((a, b) =>
       a.name.localeCompare(b.name, "fr", { sensitivity: "base" }),
     );
