@@ -1,5 +1,16 @@
 import { ProductListing, ProductState } from "../settings";
 import { getProductIdentifierFromUrl } from "../product/location";
+import {
+  ARTICLES_SELECTOR,
+  BADGE_SELECTOR,
+  DATE_SELECTOR,
+  IMAGE_SELECTOR,
+  LINK_SELECTOR,
+  PAGINATION_BUTTON_SELECTOR,
+  PAGINATION_BUTTONS_SELECTOR,
+  PRICE_SELECTOR,
+  TITLE_SELECTOR,
+} from "./selectors";
 
 export function parseProfileName(): string | null {
   // Try multiple selectors for the profile name
@@ -71,9 +82,7 @@ export function parseProduct(article: Element): {
 } | null {
   try {
     // Get the URL first to extract ID
-    const linkElem = article.querySelector(
-      'a[href^="/ad/"]',
-    ) as HTMLAnchorElement;
+    const linkElem = article.querySelector(LINK_SELECTOR) as HTMLAnchorElement;
     const relativeUrl = linkElem?.getAttribute("href") || "";
     const fullUrl = relativeUrl
       ? `https://www.leboncoin.fr${relativeUrl}`
@@ -86,23 +95,23 @@ export function parseProduct(article: Element): {
     }
 
     // Get the title
-    const titleElem = article.querySelector('p[data-test-id="adcard-title"]');
+    const titleElem = article.querySelector(TITLE_SELECTOR);
     const title = titleElem?.textContent?.trim() || "N/A";
 
     // Get the price
-    const priceElem = article.querySelector('span[data-qa-id="aditem_price"]');
+    const priceElem = article.querySelector(PRICE_SELECTOR);
     const priceText = priceElem?.textContent?.trim() || "0";
     const price = parseFloat(priceText.replace(/[^\d]/g, ""));
 
     // Get the thumbnail image
     const thumbnailElem = article.querySelector(
-      'div[data-test-id="adcard-image"] img',
+      IMAGE_SELECTOR,
     ) as HTMLImageElement;
     const thumbnail = thumbnailElem?.getAttribute("src") || "";
 
     // Check if the product is sold
     let state = ProductState.ACTIVE;
-    const badge = article.querySelector('div[data-spark-component="tag"]');
+    const badge = article.querySelector(BADGE_SELECTOR);
     if (badge && badge.textContent?.trim() === "Vendu") {
       state = ProductState.PURCHASE_COMPLETED;
     } else if (badge && badge.textContent?.trim() === "Achat en cours") {
@@ -112,7 +121,7 @@ export function parseProduct(article: Element): {
     // Get the date
     let datePosted = "N/A";
     try {
-      const dateElem = article.querySelector('p[title*="202"]');
+      const dateElem = article.querySelector(DATE_SELECTOR);
       if (dateElem) {
         datePosted = dateElem.textContent?.trim() || "N/A";
       }
@@ -153,7 +162,7 @@ export function parseProfilePage(): {
 } {
   const profileName = parseProfileName() || "Unknown Seller";
 
-  const articles = document.querySelectorAll('article[data-test-id="ad"]');
+  const articles = document.querySelectorAll(ARTICLES_SELECTOR);
   console.log(`Found ${articles.length} articles on current page`);
 
   const products: Record<string, ProductListing> = {};
@@ -169,7 +178,7 @@ export function parseProfilePage(): {
 
 export function getProfilePaginationButtons(): HTMLButtonElement[] {
   return Array.from(
-    document.querySelectorAll('button[data-spark-component="pagination-item"]'),
+    document.querySelectorAll(PAGINATION_BUTTONS_SELECTOR),
   ) as HTMLButtonElement[];
 }
 
@@ -177,6 +186,6 @@ export function getProfilePaginationButton(
   pageNum: number,
 ): HTMLButtonElement | null {
   return document.querySelector(
-    `button[data-spark-component="pagination-item"][data-index="${pageNum}"]`,
+    PAGINATION_BUTTON_SELECTOR(pageNum),
   ) as HTMLButtonElement | null;
 }

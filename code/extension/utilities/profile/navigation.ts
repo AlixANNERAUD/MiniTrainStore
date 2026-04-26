@@ -5,12 +5,14 @@ import {
   getProfilePaginationButtons,
   parseProfilePage,
 } from "@/utilities/profile/parsing";
+import { ARTICLES_SELECTOR } from "./selectors";
 
 export async function waitForProfilePageLoad(): Promise<void> {
   // Wait for articles to load
   return new Promise((resolve) => {
     const checkArticles = () => {
-      const articles = document.querySelectorAll('article[data-test-id="ad"]');
+      const articles = document.querySelectorAll(ARTICLES_SELECTOR);
+      console.log(`Found ${articles.length} articles, profile page is loaded`);
       if (articles.length > 0) {
         resolve();
       } else {
