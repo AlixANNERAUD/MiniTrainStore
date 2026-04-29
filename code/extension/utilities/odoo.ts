@@ -638,7 +638,10 @@ export async function downloadAndCropImageAsBase64(
 function getLargePhotoUrl(url: string | null): string {
   if (!url) return "";
   // Convert thumbnail URLs to full-size
-  return url.replace(/ad-thumb/g, "ad-large").replace(/ad-small/g, "ad-large");
+  return url
+    .replace(/ad-thumb/g, "ad-large")
+    .replace(/ad-small/g, "ad-large")
+    .replace(/w=256/g, "w=1200");
 }
 
 // Load images — downloads all photos for a product
