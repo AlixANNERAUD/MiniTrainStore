@@ -93,6 +93,7 @@ export async function getDescription(): Promise<string> {
   await new Promise((resolve) => setTimeout(resolve, 100));
 
   const selectors = [
+    "div[data-qa-id='adview_description_container']",
     "p#readme-content", // New selector for description
   ];
 
