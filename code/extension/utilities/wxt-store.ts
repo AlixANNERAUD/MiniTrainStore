@@ -5,7 +5,7 @@ let debounceTimeout: ReturnType<typeof setTimeout> | null = null; // Debounce ti
 
 export function defineWxtStore<
   S extends object,
-  A extends Record<string, Function>,
+  A extends Record<string, (...args: never[]) => unknown>,
 >(
   key: string,
   { state: stateInit, actions }: { state: () => S; actions: (state: S) => A },
@@ -14,13 +14,17 @@ export function defineWxtStore<
   const storageKey = `local:${key}` as `local:${string}`;
   const state = reactive(stateInit()) as S;
   let lastModified = Date.now(); // Track the last modification time
+  let hasLocalChanges = false;
+  let applyingStorageValue = false;
 
   console.log(`[Store: ${key}] Initializing store...`);
 
   // 1. Initial Load
   storage.getItem<S>(storageKey).then((saved) => {
-    if (saved) {
+    if (saved && !hasLocalChanges) {
+      applyingStorageValue = true;
       Object.assign(state, saved);
+      applyingStorageValue = false;
       console.log(`[Store: ${key}] Data hydrated from storage.`);
     } else {
       console.log(`[Store: ${key}] No saved data found, using defaults.`);
@@ -36,7 +40,9 @@ export function defineWxtStore<
         const now = Date.now();
         if (now - lastModified > 100) {
           // Avoid redundant updates within 100ms
+          applyingStorageValue = true;
           Object.assign(state, newValue);
+          applyingStorageValue = false;
           console.log(
             `📥 [${key}] Sync: Data updated from an external context.`,
           );
@@ -48,23 +54,24 @@ export function defineWxtStore<
   // 3. TO STORAGE
   watch(
     state,
-    (newValue) => {
-      const now = Date.now();
-      if (now - lastModified > 100) {
-        // Avoid redundant saves within 100ms
-        lastModified = now;
-        if (debounceTimeout) {
-          clearTimeout(debounceTimeout); // Clear the previous debounce timer
-        }
-        debounceTimeout = setTimeout(() => {
-          storage.setItem(storageKey, JSON.parse(JSON.stringify(newValue)));
-          console.log(
-            `📤 [${key}] Saved: Change detected in this context after debounce.`,
-          );
-        }, 500); // Wait 500ms before saving
+    () => {
+      if (applyingStorageValue) {
+        return;
       }
+
+      hasLocalChanges = true;
+      lastModified = Date.now();
+      if (debounceTimeout) {
+        clearTimeout(debounceTimeout);
+      }
+      debounceTimeout = setTimeout(() => {
+        storage.setItem(storageKey, JSON.parse(JSON.stringify(state)));
+        console.log(
+          `📤 [${key}] Saved: Change detected in this context after debounce.`,
+        );
+      }, 500);
     },
-    { deep: true },
+    { deep: true, flush: "sync" },
   );
 
   // 4. Initialize actions once

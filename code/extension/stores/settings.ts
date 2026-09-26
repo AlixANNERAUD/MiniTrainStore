@@ -6,6 +6,7 @@ import {
   ProductState,
   ProductUpdateStatistics,
   ProfileData,
+  parseSettingsData,
   SettingsData,
 } from "@/utilities/settings";
 import { defineWxtStore } from "@/utilities/wxt-store";
@@ -127,14 +128,12 @@ export const useSettingsStore = defineWxtStore(SETTINGS_KEY, {
         state.profiles[userIdentifier].lastScraped = new Date().toISOString();
       }
     },
-    import(newSettings: SettingsData) {
-      state.odoo = {
-        ...DEFAULT_SETTINGS.odoo,
-        ...newSettings.odoo,
-      };
-      state.profiles = newSettings.profiles;
-      state.tags = newSettings.tags;
-      state.categories = newSettings.categories;
+    import(newSettings: unknown) {
+      const normalizedSettings = parseSettingsData(newSettings);
+      state.odoo = normalizedSettings.odoo;
+      state.profiles = normalizedSettings.profiles;
+      state.tags = normalizedSettings.tags;
+      state.categories = normalizedSettings.categories;
     },
     export(): SettingsData {
       return JSON.parse(JSON.stringify(state));

@@ -53,11 +53,14 @@ export function openUrl(url: string) {
 }
 
 export function downloadStringAsFile(content: string, filename: string) {
-  const blob = new Blob([content], { type: "text/plain" });
+  const blob = new Blob([content], { type: "application/json;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
+  a.style.display = "none";
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

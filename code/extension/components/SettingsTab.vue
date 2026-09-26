@@ -38,23 +38,19 @@ function exportSettings() {
 function importSettings() {
   const input = document.createElement("input");
   input.type = "file";
-  input.accept = "application/json";
-  input.onchange = (event) => {
+  input.accept = ".json,application/json";
+  input.onchange = async (event) => {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const importedSettings = JSON.parse(e.target?.result as string);
-          settings.import(importedSettings);
-          alert("Paramètres importés avec succès !");
-        } catch (error) {
-          alert(
-            `Erreur lors de l'importation des paramètres : ${(error as Error).message}`,
-          );
-        }
-      };
-      reader.readAsText(file);
+      try {
+        const importedSettings = JSON.parse(await file.text());
+        settings.import(importedSettings);
+        alert("Paramètres importés avec succès !");
+      } catch (error) {
+        alert(
+          `Erreur lors de l'importation des paramètres : ${(error as Error).message}`,
+        );
+      }
     }
   };
   input.click();
