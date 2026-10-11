@@ -91,7 +91,9 @@ export interface ProductTemplateRequest {
   name: string;
   list_price: number;
   website_published: boolean;
-  qty_available: number;
+  type: "consu";
+  is_storable: boolean;
+  show_availability: boolean;
   description_ecommerce: string;
   product_tag_ids: [number, number, number[]][];
   taxes_id: [number, number, number[]][];
@@ -180,7 +182,7 @@ export async function getAllProducts(): Promise<
   );
 
   const response = await requestOdoo("product.template", "search_read", {
-    fields: ["display_name", "default_code", "active", "website_absolute_url"],
+    fields: ["display_name", "default_code", "active"],
     domain: [["display_name", "ilike", "a%"]], // Example: fetch all products with default_code starting with 'a'
   });
 
@@ -401,18 +403,19 @@ export async function createManualProduct(
   product: OdooManualProductInput,
 ): Promise<number> {
   const response = await requestOdoo("product.template", "create", {
-    vals_list: [product],
+    vals_list: [
+      {
+        ...product,
+        type: "consu",
+        is_storable: true,
+        show_availability: true,
+      },
+    ],
   });
 
-  if (Array.isArray(response) && typeof response[0] === "number") {
-    return response[0];
-  }
-
-  if (typeof response === "number") {
-    return response;
-  }
-
-  throw new Error("Unexpected create response format from Odoo");
+  const productId = parseCreatedProductId(response);
+  await setProductStock(productId);
+  return productId;
 }
 
 export async function updateManualProduct(
@@ -421,7 +424,31 @@ export async function updateManualProduct(
 ): Promise<void> {
   await requestOdoo("product.template", "write", {
     ids: [productId],
-    vals: product,
+    vals: {
+      ...product,
+      type: "consu",
+      is_storable: true,
+      show_availability: true,
+    },
+  });
+  await setProductStock(productId);
+}
+
+function parseCreatedProductId(response: unknown): number {
+  const record = Array.isArray(response) ? response[0] : response;
+  const id =
+    typeof record === "number"
+      ? record
+      : z.object({ id: z.number() }).parse(record).id;
+  return z.number().int().positive().parse(id);
+}
+
+async function setProductStock(productId: number): Promise<void> {
+  // Odoo's quantity inverse creates an inventory adjustment for tracked goods.
+  // Save first so that the template's product variant exists.
+  await requestOdoo("product.template", "write", {
+    ids: [productId],
+    vals: { qty_available: 1 },
   });
 }
 
@@ -706,7 +733,9 @@ async function productToOdooDict(
     list_price: product.listing.price,
     default_code: product.identifier,
     website_published: true,
-    qty_available: 1.0,
+    type: "consu",
+    is_storable: true,
+    show_availability: true,
     description_ecommerce: descriptionHtml,
     product_tag_ids: [[6, 0, tagsIds]],
     taxes_id: [[6, 0, [taxId]]],
@@ -766,12 +795,11 @@ async function createProduct(product: CombinedProduct): Promise<number> {
     vals_list: [productData],
   });
 
-  const productIds = SearchResponseSchema.parse(response);
-
-  const productId = Array.isArray(productIds) ? productIds[0] : productIds;
+  const productId = parseCreatedProductId(response);
+  await setProductStock(productId);
   console.log(`Product created with ID: ${productId}`);
 
-  return productId.id;
+  return productId;
 }
 
 // Update product in Odoo
@@ -785,6 +813,7 @@ async function updateProduct(
     ids: [productId],
     vals: productData,
   });
+  await setProductStock(productId);
 
   console.log(`Product updated with ID: ${productId}`);
 }
