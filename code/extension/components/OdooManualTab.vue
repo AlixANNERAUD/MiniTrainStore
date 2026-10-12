@@ -70,6 +70,12 @@ const selectedProduct = ref<EditableManualProduct>({
   gallery_images: [],
 });
 
+const selectedProductAdminUrl = computed(() =>
+  selectedProduct.value.id
+    ? odoo.getProductAdminUrl(selectedProduct.value.id)
+    : "",
+);
+
 const selectedFilesPreview = ref<string[]>([]);
 const selectedMainImagePreview = ref<string>("");
 
@@ -427,7 +433,7 @@ onMounted(() => {
               ? odoo.OdooProductState.ACTIVE
               : odoo.OdooProductState.EXISTS
           "
-          :odoo-url="product.website_absolute_url || null"
+          :odoo-url="odoo.getProductAdminUrl(product.id)"
           :allow-export="false"
           :show-metadata="false"
           @select-product="selectExistingProduct(product)"
@@ -627,10 +633,10 @@ onMounted(() => {
             </Button>
             <Button
               variant="outline"
-              :disabled="!selectedProduct.website_absolute_url"
-              @click="openUrl(selectedProduct.website_absolute_url || '')"
+              :disabled="!selectedProductAdminUrl"
+              @click="openUrl(selectedProductAdminUrl)"
             >
-              Voir sur Odoo
+              Voir dans Odoo
             </Button>
           </Field>
         </FieldSet>

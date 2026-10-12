@@ -183,7 +183,7 @@ function selectProduct() {
             :disabled="!props.odooUrl"
             @click="openUrl(props.odooUrl || '')"
           >
-            Voir sur Odoo
+            Voir dans Odoo
           </Button>
         </div>
       </ItemActions>

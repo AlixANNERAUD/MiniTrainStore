@@ -94,6 +94,7 @@ export interface ProductTemplateRequest {
   type: "consu";
   is_storable: boolean;
   show_availability: boolean;
+  allow_out_of_stock_order: boolean;
   description_ecommerce: string;
   product_tag_ids: [number, number, number[]][];
   taxes_id: [number, number, number[]][];
@@ -164,6 +165,14 @@ export function plainTextToHtml(text: string): string {
   return stringToHtml(container.innerHTML);
 }
 
+export function getProductAdminUrl(productId: number): string {
+  const settings = useSettingsStore();
+  return new URL(
+    `/odoo/website/product.template/${productId}`,
+    settings.odoo.value.url,
+  ).href;
+}
+
 export async function getAllProducts(): Promise<
   {
     identifier: string;
@@ -177,7 +186,6 @@ export async function getAllProducts(): Promise<
       display_name: z.string(),
       default_code: z.union([z.string(), z.boolean()]),
       active: z.boolean(),
-      website_absolute_url: z.string(),
     }),
   );
 
@@ -197,13 +205,12 @@ export async function getAllProducts(): Promise<
         display_name: string;
         default_code: string;
         active: boolean;
-        website_absolute_url: string;
       } => typeof record.default_code === "string",
     )
     .map((record) => ({
       identifier: record.default_code,
       active: record.active,
-      url: record.website_absolute_url,
+      url: getProductAdminUrl(record.id),
     }));
 }
 
@@ -409,6 +416,7 @@ export async function createManualProduct(
         type: "consu",
         is_storable: true,
         show_availability: true,
+        allow_out_of_stock_order: false,
       },
     ],
   });
@@ -429,6 +437,7 @@ export async function updateManualProduct(
       type: "consu",
       is_storable: true,
       show_availability: true,
+      allow_out_of_stock_order: false,
     },
   });
   await setProductStock(productId);
@@ -736,6 +745,7 @@ async function productToOdooDict(
     type: "consu",
     is_storable: true,
     show_availability: true,
+    allow_out_of_stock_order: false,
     description_ecommerce: descriptionHtml,
     product_tag_ids: [[6, 0, tagsIds]],
     taxes_id: [[6, 0, [taxId]]],
