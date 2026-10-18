@@ -18,12 +18,12 @@ Ne pas vernir, pelliculer ni appliquer de finition brillante sur le verso.
 Tester le stylo ou feutre habituellement utilisé sur un échantillon avant commande.
 Le verso comporte un petit logo, un titre, trois lignes très légères, une signature en bas de page et de larges zones vierges.
 
-Les SVG sont entièrement vectoriels, y compris l'illustration de train et le QR code. Les textes restent éditables et ne sont pas convertis en tracés.
-Le logo du site a été vectorisé depuis son PNG.
+Les SVG sont hybrides : textes, logo et QR code vectoriels ; illustration photo de train en JPEG. Les textes restent éditables et ne sont pas convertis en tracés.
+Le logo du site est vectoriel. L'image du train est fournie sous assets/train-recto.jpg, et intégrée dans l'export SVG autonome et dans le PDF.
 Polices utilisées : DejaVu Sans (texte courant) et Z003 (titres manuscrits). Les deux sont installées par GitHub Actions. Pour une impression fidèle, préférer le PDF généré. Le dossier sources-editables contient les copies éditables des SVG.
 QR code : https://www.minitrainstore.fr/ ; sans service de redirection tiers.
 Coordonnées reprises du site le 17 octobre 2026 : arnaud@minitrainstore.fr ; 06 06 43 83 44.
 
-Les exports PDF, PNG et ZIP sont régénérés depuis les SVG avec :
+Les exports PDF, PNG, SVG autonome et ZIP sont régénérés depuis les SVG et l'asset raster avec :
   python -m pip install cairosvg pypdf pillow
   python scripts/generate_shipping_card.py

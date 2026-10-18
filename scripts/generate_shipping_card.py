@@ -7,6 +7,7 @@ Run: python -m pip install cairosvg pypdf pillow
 from __future__ import annotations
 
 from io import BytesIO
+import base64
 from pathlib import Path
 import re
 from zipfile import ZIP_DEFLATED, ZipFile
@@ -25,7 +26,21 @@ BLEED_MM = 3
 
 
 def load_svg(face: str) -> bytes:
-    return (CARDS / f"minitrainstore-{face}.svg").read_bytes()
+    """Resolve the optional raster train image for portable print rendering."""
+    source = (CARDS / f"minitrainstore-{face}.svg").read_bytes()
+    if face == "recto":
+        image_href = b'href="assets/train-recto.jpg"'
+        if image_href not in source:
+            raise ValueError("Expected raster train asset reference missing")
+        jpg = (CARDS / "assets" / "train-recto.jpg").read_bytes()
+        encoded = base64.b64encode(jpg)
+        source = source.replace(image_href, b'href="data:image/jpeg;base64,' + encoded + b'"')
+    return source
+
+
+def write_standalone() -> None:
+    """Standalone SVG is usable without checking out or copying assets."""
+    (CARDS / "minitrainstore-recto-standalone.svg").write_bytes(load_svg("recto"))
 
 
 def svg_with_bleed(svg: bytes) -> bytes:
@@ -88,6 +103,8 @@ def write_preview() -> None:
 def write_zip() -> None:
     files = [
         "minitrainstore-recto.svg",
+        "minitrainstore-recto-standalone.svg",
+        "assets/train-recto.jpg",
         "minitrainstore-verso.svg",
         "sources-editables/minitrainstore-recto.svg",
         "sources-editables/minitrainstore-verso.svg",
@@ -102,6 +119,7 @@ def write_zip() -> None:
 
 
 if __name__ == "__main__":
+    write_standalone()
     write_pdf()
     write_preview()
     write_zip()
