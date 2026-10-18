@@ -155,6 +155,93 @@ def write_a4_sheet() -> None:
             raise AssertionError("The print sheet is not A4")
 
 
+
+def write_a4_single_face_sheet() -> None:
+    """Four recto + verso pairs on one A4 face, for a simplex printer.
+
+    Each row contains a separate recto at left and verso at right.
+    Cut the eight printed panels and join each pair back-to-back if
+    a physical two-sided card is wanted.
+    """
+    cards = PdfReader(CARDS / "minitrainstore-impression.pdf")
+    if len(cards.pages) != 2:
+        raise ValueError("Expected one recto and one verso page")
+    margin_x, margin_y = _a4_geometry()
+    writer = PdfWriter()
+    sheet = writer.add_blank_page(
+        width=A4_WIDTH_MM * MM_TO_PT,
+        height=A4_HEIGHT_MM * MM_TO_PT,
+    )
+    for row in range(A4_ROWS):
+        y_mm = A4_HEIGHT_MM - (margin_y + (row + 1) * SLOT_HEIGHT_MM)
+        for column, face in enumerate(cards.pages):
+            x_mm = margin_x + column * SLOT_WIDTH_MM
+            sheet.merge_transformed_page(
+                face,
+                Transformation().translate(x_mm * MM_TO_PT, y_mm * MM_TO_PT),
+            )
+    sheet.merge_page(_crop_marks_pdf_page())
+    output = CARDS / "minitrainstore-planche-A4-simple-face.pdf"
+    with output.open("wb") as f:
+        writer.write(f)
+    check = PdfReader(output)
+    if len(check.pages) != 1:
+        raise AssertionError("Simplex A4 sheet must have exactly one page")
+    page = check.pages[0]
+    if (
+        abs(float(page.mediabox.width) - A4_WIDTH_MM * MM_TO_PT) > 0.1
+        or abs(float(page.mediabox.height) - A4_HEIGHT_MM * MM_TO_PT) > 0.1
+    ):
+        raise AssertionError("Simplex sheet is not A4")
+
+
+def write_a4_single_face_preview() -> None:
+    """Preview the four pairs on one sheet; unlike the PDF, it has a title."""
+    density = 3
+    page_w = A4_WIDTH_MM * density
+    page_h = A4_HEIGHT_MM * density
+    outer = 24
+    header = 44
+    canvas = Image.new(
+        "RGB", (page_w + 2 * outer, page_h + header + outer), "#e7ebee"
+    )
+    draw = ImageDraw.Draw(canvas)
+    draw.rectangle((outer, header, outer + page_w, header + page_h), fill="white")
+    try:
+        font = ImageFont.truetype("DejaVuSans.ttf", 17)
+    except OSError:
+        font = ImageFont.load_default()
+    draw.text(
+        (outer, 10), "A4 simple face — 4 rectos et 4 versos",
+        font=font, fill="#133a57",
+    )
+    margin_x, margin_y = _a4_geometry()
+    cards = []
+    for face in ("recto", "verso"):
+        png = cairosvg.svg2png(
+            bytestring=svg_with_bleed(load_svg(face)),
+            output_width=round(SLOT_WIDTH_MM * density),
+            output_height=round(SLOT_HEIGHT_MM * density),
+        )
+        cards.append(Image.open(BytesIO(png)).convert("RGB"))
+    for row in range(A4_ROWS):
+        for column, card in enumerate(cards):
+            x = outer + round((margin_x + column * SLOT_WIDTH_MM) * density)
+            y = header + round((margin_y + row * SLOT_HEIGHT_MM) * density)
+            canvas.paste(card, (x, y))
+    for x1, y1, x2, y2 in _crop_mark_segments():
+        draw.line(
+            (
+                outer + round(x1 * density), header + round(y1 * density),
+                outer + round(x2 * density), header + round(y2 * density),
+            ),
+            fill="#485563", width=1,
+        )
+    canvas.save(
+        CARDS / "minitrainstore-planche-A4-simple-face-apercu.png",
+        optimize=True,
+    )
+
 def write_a4_preview() -> None:
     """Side-by-side preview of the two imposed pages (not for printing)."""
     pixels_per_mm = 3
@@ -243,6 +330,8 @@ def write_zip() -> None:
         "minitrainstore-impression.pdf",
         "minitrainstore-planche-A4.pdf",
         "minitrainstore-planche-A4-apercu.png",
+        "minitrainstore-planche-A4-simple-face.pdf",
+        "minitrainstore-planche-A4-simple-face-apercu.png",
         "minitrainstore-apercu.png",
         "README.md",
         "LIRE-AVANT-IMPRESSION.txt",
@@ -257,6 +346,8 @@ if __name__ == "__main__":
     write_pdf()
     write_a4_sheet()
     write_a4_preview()
+    write_a4_single_face_sheet()
+    write_a4_single_face_preview()
     write_preview()
     write_zip()
-    print("Created shipping card, eight-up A4 duplex sheet, previews and ZIP.")
+    print("Created cards, 8-up duplex sheet, 4-pair simplex sheet, previews and ZIP.")

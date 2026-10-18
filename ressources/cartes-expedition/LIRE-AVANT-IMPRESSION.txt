@@ -35,3 +35,12 @@ Mise en page : 2 colonnes x 4 rangées, 85 x 55 mm format fini par carte, 3 mm d
 Impression : taille réelle (100 %), recto-verso, retournement sur les BORDS LONGS, sans ajuster.
 Les repères de coupe sont à l'extérieur du format fini, et les deux faces partagent la même grille.
 Tester le sens et le décalage d'impression sur papier ordinaire, avant de couper.
+
+
+PLANCHE A4 SIMPLE FACE (IMPRIMANTE SANS RECTO-VERSO) :
+Fichier : minitrainstore-planche-A4-simple-face.pdf ; UNE SEULE page A4 portrait.
+4 lignes avec un recto à gauche et son verso à droite : 4 paires sur la même face.
+Imprimer à 100 % / taille réelle, en simple face, sans « Ajuster à la page ».
+Découper les 8 panneaux aux repères (85 x 55 mm finis chacun, fond perdu 3 mm).
+Assembler ensuite chaque paire dos à dos avec de l'adhésif double face si souhaité.
+Contrôler d'abord les marges d'impression, le QR code et une découpe d'essai.
