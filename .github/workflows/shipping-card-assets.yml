@@ -1,0 +1,50 @@
+name: Build shipping card print assets
+
+on:
+  push:
+    paths:
+      - 'ressources/cartes-expedition/minitrainstore-recto.svg'
+      - 'ressources/cartes-expedition/minitrainstore-verso.svg'
+      - 'ressources/cartes-expedition/sources-editables/**'
+      - 'ressources/cartes-expedition/README.md'
+      - 'ressources/cartes-expedition/LIRE-AVANT-IMPRESSION.txt'
+      - 'scripts/generate_shipping_card.py'
+      - '.github/workflows/shipping-card-assets.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    name: Generate PDF, preview and ZIP
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install vector artwork fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-dejavu-core fonts-urw-base35
+          fc-cache -f
+      - name: Install export dependencies
+        run: python -m pip install 'cairosvg>=2.7,<3' 'pypdf>=5,<8' 'pillow>=10,<13'
+      - name: Generate print exports
+        run: python scripts/generate_shipping_card.py
+      - name: Commit updated files if needed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            ressources/cartes-expedition/minitrainstore-impression.pdf \
+            ressources/cartes-expedition/minitrainstore-apercu.png \
+            ressources/cartes-expedition/minitrainstore-kit-carte.zip
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(shipping): regenerate print-ready exports"
+            git push
+          fi

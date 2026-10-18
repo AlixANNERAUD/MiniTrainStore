@@ -1,12 +1,29 @@
-MINI TRAIN STORE — CARTE POUR LES EXPÉDITIONS
+MINI TRAIN STORE — CARTE POUR LES EXPÉDITIONS (AVEC MESSAGE MANUSCRIT)
+
+RECTO : informations de la boutique, logo, remerciement, site, coordonnées et QR code.
+VERSO : fond blanc presque entièrement libre pour écrire un mot personnalisé.
+La carte de visite reste inchangée.
 
 Format fini : 85 × 55 mm, horizontal.
-PDF : 2 pages, recto puis verso ; page de 91 × 61 mm avec 3 mm de fond perdu de chaque côté. TrimBox au format fini. Pas de repères de coupe ajoutés.
+PDF : 2 pages, recto puis verso ; page de 91 × 61 mm avec 3 mm de fond perdu de chaque côté. TrimBox au format fini.
+Pas de repères de coupe ajoutés.
 Imprimer à 100 %, sans ajustement automatique ; ne pas réduire la page entière à 85 × 55 mm.
-Impression professionnelle : transmettre le PDF et demander un format fini de 85 × 55 mm. Confirmer le profil couleur et les contraintes du prestataire avant tirage. Le PDF utilise les couleurs RVB du site et ne constitue pas un export certifié PDF/X.
-Suggestion : papier mat 300 à 350 g/m².
+Impression professionnelle : transmettre le PDF et demander un format fini de 85 × 55 mm.
+Confirmer le profil couleur et les contraintes du prestataire avant tirage.
+Le PDF utilise les couleurs RVB du site et ne constitue pas un export certifié PDF/X.
 
-Les SVG principaux ont des textes convertis en tracés : aucun besoin de police, aucune image bitmap intégrée. Le logo du site a été vectorisé depuis son PNG, sans modification volontaire du dessin.
-Le dossier sources-editables contient les SVG avec textes éditables (polices DejaVu Sans et Nimbus Roman Italic).
+IMPORTANT POUR L'ÉCRITURE :
+Papier mat non couché conseillé, 300 à 350 g/m².
+Ne pas vernir, pelliculer ni appliquer de finition brillante sur le verso.
+Tester le stylo ou feutre habituellement utilisé sur un échantillon avant commande.
+Le verso comporte un petit logo, un titre, trois lignes très légères, une signature en bas de page et de larges zones vierges.
+
+Les SVG sont entièrement vectoriels, y compris l'illustration de train et le QR code. Les textes restent éditables et ne sont pas convertis en tracés.
+Le logo du site a été vectorisé depuis son PNG.
+Polices utilisées : DejaVu Sans (texte courant) et Z003 (titres manuscrits). Les deux sont installées par GitHub Actions. Pour une impression fidèle, préférer le PDF généré. Le dossier sources-editables contient les copies éditables des SVG.
 QR code : https://www.minitrainstore.fr/ ; sans service de redirection tiers.
 Coordonnées reprises du site le 17 octobre 2026 : arnaud@minitrainstore.fr ; 06 06 43 83 44.
+
+Les exports PDF, PNG et ZIP sont régénérés depuis les SVG avec :
+  python -m pip install cairosvg pypdf pillow
+  python scripts/generate_shipping_card.py
