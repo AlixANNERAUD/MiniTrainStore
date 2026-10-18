@@ -3,22 +3,6 @@
 <rect x="-3" y="-3" width="91" height="61" fill="#ffffff"/>
 <rect x=".9" y=".9" width="83.2" height="53.2" fill="none" stroke="#0a659c" stroke-width=".26"/>
 
-<g opacity=".34" fill="none" stroke="#629ec3" stroke-linecap="round">
-  <path d="M-5 39 C9 42 15 51 18 61" stroke-width="1.05"/>
-  <path d="M-7 43 C5 47 9 53 11 62" stroke-width="1.05"/>
-  <path d="M-6.90 39.00l6.10 2.3" stroke-width=".52"/>
-<path d="M-5.71 41.05l5.85 2.3" stroke-width=".52"/>
-<path d="M-4.52 43.10l5.60 2.3" stroke-width=".52"/>
-<path d="M-3.35 45.15l5.35 2.3" stroke-width=".52"/>
-<path d="M-2.21 47.20l5.10 2.3" stroke-width=".52"/>
-<path d="M-1.10 49.25l4.85 2.3" stroke-width=".52"/>
-<path d="M-0.03 51.30l4.60 2.3" stroke-width=".52"/>
-<path d="M0.98 53.35l4.35 2.3" stroke-width=".52"/>
-<path d="M1.94 55.40l4.10 2.3" stroke-width=".52"/>
-<path d="M2.83 57.45l3.85 2.3" stroke-width=".52"/>
-<path d="M3.66 59.50l3.60 2.3" stroke-width=".52"/>
-<path d="M4.40 61.55l3.35 2.3" stroke-width=".52"/>
-  </g>
 <!-- Photo discrète du train, asset raster volontairement séparé pour permettre les retouches. -->
 <g aria-label="Photographie du train miniature">
   <image href="assets/train-recto.jpg" x="70.3" y="37.4" width="13.4" height="15.5" preserveAspectRatio="xMidYMid meet"/>
@@ -476,7 +460,4 @@
 <circle cx="43.2" cy="46.05" r="1.65" fill="#058acc"/><path d="M42.6 45.4Q42.7 46.2 43.55 46.63L43.95 46.3" fill="none" stroke="#ffffff" stroke-width=".22" stroke-linecap="round" stroke-linejoin="round"/>
 <text x="46.4" y="46.83" font-family="DejaVu Sans,Arial,sans-serif" font-size="2.3" fill="#092b55" font-weight="bold">06 06 43 83 44</text>
 </g>
-<path d="M45.4 49.2q-.4-.9-1.23-.82q-1.2.07-1.05 1.33q.08 1.14 2.28 2.28q2.12-1.5 2.11-2.6q-.03-1.1-1.17-1.13q-.82 0-1 .94Z" fill="#ef1c29" opacity=".96"/>
-<text x="55.4" y="52.5" fill="#133a57" font-family="Z003,'URW Chancery L',serif" font-style="italic" font-size="1.65" text-anchor="middle">Le monde du train miniature</text>
-<path d="M47 53.08Q56 51.8 65 53.05" fill="none" stroke="#ed2b31" stroke-width=".18" stroke-linecap="round"/>
 </svg>

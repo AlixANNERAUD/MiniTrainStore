@@ -44,6 +44,8 @@ jobs:
           git add -- \
             ressources/cartes-expedition/minitrainstore-recto-standalone.svg \
             ressources/cartes-expedition/minitrainstore-impression.pdf \
+            ressources/cartes-expedition/minitrainstore-planche-A4.pdf \
+            ressources/cartes-expedition/minitrainstore-planche-A4-apercu.png \
             ressources/cartes-expedition/minitrainstore-apercu.png \
             ressources/cartes-expedition/minitrainstore-kit-carte.zip
           if ! git diff --cached --quiet; then

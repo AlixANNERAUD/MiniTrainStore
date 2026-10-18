@@ -27,3 +27,11 @@ Coordonnées reprises du site le 17 octobre 2026 : arnaud@minitrainstore.fr ; 06
 Les exports PDF, PNG, SVG autonome et ZIP sont régénérés depuis les SVG et l'asset raster avec :
   python -m pip install cairosvg pypdf pillow
   python scripts/generate_shipping_card.py
+
+
+PLANCHE A4 (8 CARTES PAR FACE) :
+Fichier : minitrainstore-planche-A4.pdf ; 2 pages A4 portrait (rectos puis versos).
+Mise en page : 2 colonnes x 4 rangées, 85 x 55 mm format fini par carte, 3 mm de fond perdu.
+Impression : taille réelle (100 %), recto-verso, retournement sur les BORDS LONGS, sans ajuster.
+Les repères de coupe sont à l'extérieur du format fini, et les deux faces partagent la même grille.
+Tester le sens et le décalage d'impression sur papier ordinaire, avant de couper.
