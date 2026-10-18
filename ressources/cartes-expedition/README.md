@@ -1,38 +1,35 @@
 # Mini Train Store — Carte de remerciement pour les expéditions
 
-À glisser dans les colis pour remercier les clients et pouvoir ajouter un mot personnel **au stylo**.
+Carte recto-verso à glisser dans les colis, en conservant le verso largement libre pour ajouter un message manuscrit.
 
 ![Aperçu recto-verso](minitrainstore-apercu.png)
 
-## Nouveau recto-verso
+## Design
 
-- **Recto (imprimé)** : logo Mini Train Store, « Merci pour votre commande ! », message de marque, adresse du site, e-mail, téléphone et **QR code vers https://www.minitrainstore.fr/**.
-- **Verso (à écrire)** : **blanc, pratiquement vierge**, avec seulement un discret trait bleu en bas à droite. Aucun QR code, contact ou grand visuel ne gêne l’écriture.
-
-La [carte de visite](../cartes-de-visite/) reste distincte et inchangée.
+- **Recto** : logo d'origine MiniTrainStore, grand « Merci ! », remerciement concis **en un paragraphe de deux lignes**, invitation à nous écrire pour un avis, une question ou une réclamation, **QR code** vers https://www.minitrainstore.fr/, URL, e-mail (`arnaud@minitrainstore.fr`) et téléphone (`06 06 43 83 44`). Illustration ferroviaire dessinée en SVG, en rappel de la maquette approuvée.
+- **Verso** : petit logo, « Un petit mot pour vous… », **grande zone blanche** avec trois lignes très discrètes pour écrire au stylo, signature et motif de rails.
+- La [carte de visite](../cartes-de-visite/) reste inchangée.
 
 ## Fichiers
 
-- [PDF prêt pour impression recto-verso](minitrainstore-impression.pdf) — deux pages dans l’ordre recto puis verso ; format fini **85 × 55 mm**, fond perdu **3 mm**, pages **91 × 61 mm** avec TrimBox.
-- SVG vectoriels, **sans dépendance aux polices** (textes convertis en tracés) : [recto](minitrainstore-recto.svg) et [verso](minitrainstore-verso.svg).
-- [SVG avec textes éditables](sources-editables/) (DejaVu Sans).
+- [SVG du recto](minitrainstore-recto.svg) et [SVG du verso](minitrainstore-verso.svg) : **entièrement vectoriels**, y compris le QR code et l'illustration de locomotive. Les caractères restent en éléments texte SVG éditables.
+- [Sources éditables](sources-editables/) : copies éditables des SVG destinées aux retouches.
+- [PDF d'impression recto-verso](minitrainstore-impression.pdf) : 2 pages, format fini **85 × 55 mm**, fond perdu de **3 mm** de chaque côté et TrimBox au format fini.
 - [Aperçu recto-verso](minitrainstore-apercu.png).
 - [Kit complet ZIP](minitrainstore-kit-carte.zip).
-- [Consignes d’impression](LIRE-AVANT-IMPRESSION.txt).
+- [Consignes d'impression](LIRE-AVANT-IMPRESSION.txt).
 
-## Papier et écriture
+**Polices** : texte courant en DejaVu Sans ; titres manuscrits en Z003 avec une police de secours générique. Les SVG restent éditables mais leur rendu typographique peut varier selon les polices installées. Le PDF est destiné à garantir le rendu du tirage ; les polices requises sont installées dans le workflow de génération.
 
-Choisir de préférence un **papier mat non couché**, suffisamment épais (**300 à 350 g/m²**), avec un verso non pelliculé : faire un test au stylo ou au feutre avant le tirage en nombre. Éviter le vernis, le brillant et le pelliculage au verso, qui rendent l’écriture difficile.
+**Écriture** : papier mat non couché conseillé (300 à 350 g/m²), sans pelliculage ni vernis au verso. Faire un essai avec le stylo utilisé en boutique.
 
-Le QR code est vectoriel et pointe directement vers le site (sans redirection tierce). Les coordonnées proviennent de la boutique au 17 octobre 2026.
-
-## Régénérer les exports
-
-En cas de modification des SVG, exécuter depuis la racine du dépôt :
+## Reproduire les exports
 
 ```sh
 python -m pip install cairosvg pypdf pillow
 python scripts/generate_shipping_card.py
 ```
 
-Le script régénère le **PDF**, le **PNG d’aperçu** et le **ZIP**, à partir des SVG vectoriels principaux. Le workflow GitHub Actions [shipping-card-assets.yml](../../.github/workflows/shipping-card-assets.yml) met automatiquement à jour ces exports après une modification des sources.
+Sous Debian/Ubuntu, installer également `fonts-dejavu-core` et `fonts-urw-base35` pour conserver les mêmes polices que l'export CI. La [GitHub Action](../../.github/workflows/shipping-card-assets.yml) régénère le PDF, le PNG et le ZIP après une modification des SVG.
+
+Les coordonnées reprennent celles publiées par la boutique en octobre 2026. Le QR code pointe directement vers l'URL officielle, sans service de redirection.
