@@ -3,22 +3,6 @@
 <rect x="-3" y="-3" width="91" height="61" fill="#ffffff"/>
 <rect x=".9" y=".9" width="83.2" height="53.2" fill="none" stroke="#0a659c" stroke-width=".26"/>
 
-<g opacity=".34" fill="none" stroke="#629ec3" stroke-linecap="round">
-  <path d="M-5 39 C9 42 15 51 18 61" stroke-width="1.05"/>
-  <path d="M-7 43 C5 47 9 53 11 62" stroke-width="1.05"/>
-  <path d="M-6.90 39.00l6.10 2.3" stroke-width=".52"/>
-<path d="M-5.71 41.05l5.85 2.3" stroke-width=".52"/>
-<path d="M-4.52 43.10l5.60 2.3" stroke-width=".52"/>
-<path d="M-3.35 45.15l5.35 2.3" stroke-width=".52"/>
-<path d="M-2.21 47.20l5.10 2.3" stroke-width=".52"/>
-<path d="M-1.10 49.25l4.85 2.3" stroke-width=".52"/>
-<path d="M-0.03 51.30l4.60 2.3" stroke-width=".52"/>
-<path d="M0.98 53.35l4.35 2.3" stroke-width=".52"/>
-<path d="M1.94 55.40l4.10 2.3" stroke-width=".52"/>
-<path d="M2.83 57.45l3.85 2.3" stroke-width=".52"/>
-<path d="M3.66 59.50l3.60 2.3" stroke-width=".52"/>
-<path d="M4.40 61.55l3.35 2.3" stroke-width=".52"/>
-  </g>
 <!-- Photo discrète du train, asset raster volontairement séparé pour permettre les retouches. -->
 <g aria-label="Photographie du train miniature">
   <image href="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA8KCw0LCQ8NDA0REA8RFiUYFhQUFi0gIhslNS84NzQvNDM7QlVIOz9QPzM0SmRLUFdaX2BfOUdob2dcblVdX1v/2wBDARARERYTFisYGCtbPTQ9W1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1v/wAARCAB+AHMDASIAAhEBAxEB/8QAGwAAAQUBAQAAAAAAAAAAAAAABAABAwUGAgf/xAA7EAACAQMCAwcCAwUHBQAAAAABAgMABBESIQUxQQYTIlFhcYEykRShsRUjM0LRByQ0UmLh8ENTgpLB/8QAGgEAAwEBAQEAAAAAAAAAAAAAAAECAwQFBv/EACMRAAMAAgEEAgMBAAAAAAAAAAABEQIDEgQhMVETQQUVMkL/2gAMAwEAAhEDEQA/APRKVKmoAempVDdXCW0Rdzt+tHgaTfZEpOK4aZQcA1mrzjQeZlMqqB/KG5UOOJqx2kH/ALClQanY1MlwQPDgn3qIXb6sFSaqOHyw3Rbvbru9s4BAzQ5vSCQJCwBIDeYoojRfiZP+0ce9R/jHJ3GBVD+0nXk7fejLLiHeN+90lQcbihuF4YPPwXUUjMuWrvvKFVkKjSxI6b0RGysOQBFFE8WhpZigyBtUYu96nbSVIOMVC0ttDzZFopJOHyM0qE/adoP+stKijgdTU9cmmIYmst2j4j/eWQHwwg59TWjuphb28kp5IpPvWCv83EqRsT+9bU5HPSOf/wBrPPvEdWhLFPY/oBlQMA04JlZBI2/LUdh743oRkjzsD96LQPJNMoXBcll9VHT4/rUE8LxI0jjCjrnr0qjnI0wxYAYRTz8670EfTK4z611BBIIlAjJzv9/9qUpEAJfmDjTnr6np/wA5UwI3MsYVhcSbkeEMavI5mht41Oc4yfeqOyR7u+QyjS31EeXl+Q/OrK+k8Gkc22Fc+zLvD2Og1LhWvISeN3XdARuVUHG3OhLXtReCOaSJ22yDr3O1QPsigHG4qu4fGH4feYDF0VnUAZz4gMVWutVnL1jSzmJok4lxC74XJevcvpUjKZ86q34jO/NmPzRFurDhNvHkqrrl06Eg4pBFX+UVqkcFO4bg90uob43pVCTg0qcCnqVcE10a5bltQIqOPzabdYgd3O9Y7iRQSksj7bBhWk4zI0t8USN20DA0DJ2qindWJXUNQ5qTgj4rF5R09DVqx2YLDlDOzMVnDQyNrXcKzEUnlkc921w+BvpL5GfSrOWNGkyyr65HKiLuwsYok7shpOoxz9aFuT+i8vx7TSWXkpWu7wSGFJ3VSB4nIBA9MVIBIR/iEO2ACoxjrRotocg9ymem29MbWBAWMKjAzutHzL0P9bmvOSJOGRsnfSyeJmOAcY3rmRu8uSeiDA96nV1hs0GpdhqIHnQ0AOjU2NR3NYZus9PXiteuIkMYcqTnaibOJQtyV0qRENzsPqFWnDezstzBHPLMI0cagqgk4q5teA2NsfpaUsMN3hyDjcbe9dWCmMPn9+XPY2ZRY5LiC2ESM57s7Af6jRtvwC9mwXURD/VzrXRxRxDTEiqo2AUYpzV0xhmh2WGPFMc0q0dKlRwLJqN6kNRuQASegpiBDbtFcfiLYR6mXDq2Rk885qgu+BXV9fB7lIlhZyXeOQZA9iKbi/EJpZcwtoVc6dLFc71nr7jvE4dku5kPn3mofnUylLJp1F7J2MhLao+ITD3QH9KibsZMPo4mM+sZ/rWaHa3tAhwtwZABnxQg7fau07ecZXYm1f3j/oan40dC6zcv9B3G+B8Q4bbxubpp1kkCERI2VHPPKi+z1nwdre4PFEldxjAnV9hjfA6mgIu3/EV/iwWw9VD7/Y0RH/aHOQdVvA2AT9brmmsEiM9+zZ/TDoey15LY6Y+6hSVi/jbcKTkZGOeMUfa9lI1YNcXLOPJVwPuaNtu0vDJLZJXv4QSoJUEkg45cqGuu1NosqxW0ckrMQFz4B8nnj4qXrx8lPqtvHjexfIixRqijCqABTTMir+8YKuNyTgVkLjtNfzBihit0G3hGT9zWd4jxeO5hkSe6ln1upOHJORnb2q6c56Dc8cs7UfxNZK6gEGdqqLrtQ7HEESxjzc1j5OLTM4h0d2iJpBz08qrElkl4igLs4zuM0owNk/HLkuSZ2+BSqvLRg4LDNKkUepHlUUgLIwHMgipTUbGtCDH8Ts57ZNU0ZVScAg5rK8QDSykIC23JRvXoPHre5u4kjt4wwG+SwBzWDvVmjdtRKsuxGcEUAScQvWWJYbGKQTJ9Tlyc7eVU3FpZZba3a4XTIVyQVwc5O9cwXjpeOsszqsisobJOk9D96BnmmuWBlkZ2GwJ8qEBNbnECjNSSOTC45jT1FDRxlkOcgjamyR4d9/M0AH8PIwmfOrtiNSkuNj88qpIrVpZkdfCCmonOwou4ldLdkg8TDwsw/l/3qWNA19dLNcN3YLxRJyx186EsRMWP4dSX25LnAzXVv37CSKFS7uNJKjb71YWvDZYApuLgRqOg50WIJQS47uGYKDI7k5JO9Nb2U8kxmA7sHlmrGWe0jJ7iPW/LJpo4ry7bSoKqanlSoRGzU/XceLrvSq0Xs5OVBOc0qVHGeptUbDNSMcCgL25WIeJvgc61Zmh55o4QdbAdazPHZuHzKZLq3jQ42kZtJPtjnT8Rv5WBWId2M7Md2+9ZTiCSyuxYlnJ5tvn5qYOlXxOSw7w/g1nZs7s5GnHoOf50NFdIi47sk+9dXFnJrJIqL8K2cLkk7AAHJqqhdzuS5SQeFCD71GJOrFyPQ1ZWnZ64dgblhbqej/Wf/H+tWaRcP4Tp1r4ydpNpG+PL7VLyQ+LK22teJTRqyhoYc5DStgH45mjFtLWzRpLifWS3iXAxn250813ezFxBG6gHIdAWJHrua7s+CzXjRzt4RO2CQ/iPwRUt+y0iGTiBRTDaQaD0bHOlBw+9vnDNllfcE8ga1HDuz9vbsBMhZ4znWVwat7a3ERbul9MYrO+ip7M9w/s3Ghd3O4AyD0NXlrZxRKAqg+RqdUVZCHJ1e2xotIgVwAAAedAeAXum6ClRndrSpwKH3JOnmap7pCxONPyauZ+XI/FVlwvegp06ZWt2Yopbm1QAl43YD/KVNVF1AcBFSQu3IGH+laG4tI9WZdBHkgqvvLuK2RhDgADdEJ1MfWs8mWil/YwWTN24jH+SPJc/HT86kllsuFh/wyxBgMERvqlJ9Tjb8qhknnupAbe4S2jByYzKQxNF2HCHaQL3U9vrGoypNqzn9c1DfsueiulvJpmX8PLFFGRkqZRqJO3PG1FWfZ+4aYwENbtuVZtEgY/FaKz4TFbW7R3TJL4ucsYyPKrEjGhFRGYjKkHfz59KL6CFVa8BhtyjRRKs6jeQAZbz2B/5mjmiBjbudKybj6gSceXry2oiSLvGJckLnDA9fgfrSKNI5ICgKMHAySOnWiUKDqCdLNraZiMjqDvj22zU8aM0+SSARnlg1MIlGrDFgf5c8tuX60yIGxgMqgbZxgjpT4hRwUEgHUAnBHip11AgkYwOfn7+VOI8Hzz60+gHoeW2d6IIYMcb7HrjelXYTAxv96VOCodMBjeq+6mEYI6Hyo+cZGKrpYSc4I+a1Zmique+f+GwCttjO9Bw8MMsxVBNCcbtzya0KWETIrMoLDfNSSBUOcdKzZokVFrwmJYClxomYHOpkGaO091GoiCalGB71IobxAkYO42pwqqvhUbbnaoWJVIynjLM5IxpxkfeuljZ4nBUg5AB1bkV0qKSGKjfpUunSRyIFVBESoEACFtXmTmu1BwRnOd845V0oJJIrpUxmmI5QFcBjn4504XUMgCpFXpmuwuBTgqRCPketdaalxS004S2RaKVS4pU4FP/2Q==" x="70.3" y="37.4" width="13.4" height="15.5" preserveAspectRatio="xMidYMid meet"/>
@@ -476,7 +460,4 @@
 <circle cx="43.2" cy="46.05" r="1.65" fill="#058acc"/><path d="M42.6 45.4Q42.7 46.2 43.55 46.63L43.95 46.3" fill="none" stroke="#ffffff" stroke-width=".22" stroke-linecap="round" stroke-linejoin="round"/>
 <text x="46.4" y="46.83" font-family="DejaVu Sans,Arial,sans-serif" font-size="2.3" fill="#092b55" font-weight="bold">06 06 43 83 44</text>
 </g>
-<path d="M45.4 49.2q-.4-.9-1.23-.82q-1.2.07-1.05 1.33q.08 1.14 2.28 2.28q2.12-1.5 2.11-2.6q-.03-1.1-1.17-1.13q-.82 0-1 .94Z" fill="#ef1c29" opacity=".96"/>
-<text x="55.4" y="52.5" fill="#133a57" font-family="Z003,'URW Chancery L',serif" font-style="italic" font-size="1.65" text-anchor="middle">Le monde du train miniature</text>
-<path d="M47 53.08Q56 51.8 65 53.05" fill="none" stroke="#ed2b31" stroke-width=".18" stroke-linecap="round"/>
 </svg>
